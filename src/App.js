@@ -1,3 +1,4 @@
+/* global gapi */
 import React, { useEffect, useState, useCallback } from 'react';
 import Chart from 'react-apexcharts';
 import DatePicker from "react-datepicker";
