@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import LoginPage from './LoginPage';
-import {StyledTable, FullWidthTableContainer, FullWidthChartContainer, MainPage, TrackerFrame, Tracker, TrackerText, StyledApp, StatisticsContainer, StatisticsData, StatisticsLabel } from "./StyledComponents";
+import {SortButton, SortLabel, GenericButton, StyledTable, FullWidthTableContainer, FullWidthChartContainer, MainPage, TrackerFrame, Tracker, TrackerText, StyledApp, StatisticsContainer, StatisticsData, StatisticsLabel } from "./StyledComponents";
 
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
@@ -27,7 +27,9 @@ function App() {
   const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const [endDate, setEndDate] = useState(new Date()); // default to current date
   const [eventCount, setEventCount] = useState(500); // Replace 10 with your desired default event count
-
+  const [isChartVisible, setIsChartVisible] = useState(false);
+  const [sortNewestFirst, setSortNewestFirst] = useState(true);
+  const [averageTimeMode, setAverageTimeMode] = useState('day-hour');
 
 
   useEffect(() => {
@@ -190,22 +192,40 @@ function App() {
   }
 
   function formatTime(milliseconds) {
-    const seconds = milliseconds / 1000;
-    const minutes = seconds / 60;
-    const hours = minutes / 60;
-    const days = hours / 24;
-    const weeks = days / 7;
-    const months = days / 30;
-    const years = days / 365;
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
   
-    if (years >= 1) return `${years.toFixed(2)} years`;
-    if (months >= 1) return `${months.toFixed(2)} months`;
-    if (weeks >= 1) return `${weeks.toFixed(2)} weeks`;
-    if (days >= 1) return `${days.toFixed(2)} days`;
-    if (hours >= 1) return `${hours.toFixed(2)} hours`;
-    if (minutes >= 1) return `${minutes.toFixed(2)} minutes`;
-    return `${seconds.toFixed(2)} seconds`;
-  }
+    if (years >= 1) {
+      const remainingMonths = months - years * 12;
+      return `${years} ${years > 1 ? "years" : "year"} ${remainingMonths > 0 ? `${remainingMonths} ${remainingMonths > 1 ? "months" : "month"}` : ""}`;
+    } 
+    if (months >= 1) {
+      const remainingDays = days - months * 30;
+      return `${months} ${months > 1 ? "months" : "month"} ${remainingDays > 0 ? `${remainingDays} ${remainingDays > 1 ? "days" : "day"}` : ""}`;
+    } 
+    if (weeks >= 1) {
+      const remainingDays = days - weeks * 7;
+      return `${weeks} ${weeks > 1 ? "weeks" : "week"} ${remainingDays > 0 ? `${remainingDays} ${remainingDays > 1 ? "days" : "day"}` : ""}`;
+    } 
+    if (days >= 1) {
+      const remainingHours = hours - days * 24;
+      return `${days} ${days > 1 ? "days" : "day"} ${remainingHours > 0 ? `${remainingHours} ${remainingHours > 1 ? "hours" : "hour"}` : ""}`;
+    } 
+    if (hours >= 1) {
+      const remainingMinutes = minutes - hours * 60;
+      return `${hours} ${hours > 1 ? "hours" : "hour"} ${remainingMinutes > 0 ? `${remainingMinutes} ${remainingMinutes > 1 ? "minutes" : "minute"}` : ""}`;
+    } 
+    if (minutes >= 1) {
+      const remainingSeconds = seconds - minutes * 60;
+      return `${minutes} ${minutes > 1 ? "minutes" : "minute"} ${remainingSeconds > 0 ? `${remainingSeconds} ${remainingSeconds > 1 ? "seconds" : "second"}` : ""}`;
+    } 
+    return `${seconds} ${seconds > 1 ? "seconds" : "second"}`;
+  }  
 
   function calculateTimeSinceLastEvent(title) {
     const filteredEvents = events.filter(event => event.summary.toLowerCase() === title.toLowerCase());  
@@ -225,6 +245,40 @@ function App() {
   const filteredEvents = events.filter(event => event.summary.toLowerCase().includes(filter.toLowerCase()));
   const daysInRange = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
   const completionRate = Math.round((filteredEvents.length / daysInRange) * 100);
+
+  const toggleAverageTimeMode = () => {
+    setAverageTimeMode(prevMode => prevMode === 'day-hour' ? 'hour' : 'day-hour');
+  };
+
+  const [timeSinceLastEventMode, setTimeSinceLastEventMode] = useState('day-hour');
+  const toggleTimeSinceLastEventMode = () => {
+    setTimeSinceLastEventMode(prevMode => prevMode === 'day-hour' ? 'hours' : 'day-hour');
+  }
+  
+
+
+
+  const formatDate = (date) => {
+    const now = new Date();
+    const eventDate = new Date(date);
+    
+    // calculate the difference in days
+    const diffInDays = Math.floor((now - eventDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      return "Today";
+    } else if (diffInDays === 1) {
+      return "Yesterday";
+    } else if (diffInDays > 1 && diffInDays <= 5) {
+      return `${diffInDays} days ago`;
+    } else {
+      return eventDate.toLocaleDateString('en-EN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+  }
   
 
   async function handleAuthCallback(resp) {
@@ -301,6 +355,13 @@ function App() {
     setCalendarId(id);
     localStorage.setItem('calendarId', id);
   }
+
+  const toggleSortOrder = useCallback(() => {
+    setSortNewestFirst(prevSortNewestFirst => !prevSortNewestFirst);
+  }, []);
+
+  
+  
   
 
   const uniqueTitles = [...new Set(events.map(event => event.summary))];
@@ -352,14 +413,30 @@ function App() {
         <StatisticsData>{events.filter(event => event.summary.toLowerCase().includes(filter.toLowerCase())).length}</StatisticsData>
       </StatisticsContainer>
 
-      <StatisticsContainer>
+      <StatisticsContainer onClick={toggleAverageTimeMode}>
         <StatisticsLabel>Average time between events:</StatisticsLabel>
-        <StatisticsData>{averageTime ? `${formatTime(averageTime)} (${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours)` : 'N/A'}</StatisticsData>
+        <StatisticsData>{averageTimeMode === 'day-hour' 
+                          ? averageTime 
+                            ? `${formatTime(averageTime)}` 
+                            : 'N/A'
+                          : averageTime 
+                            ? `${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours` 
+                            : 'N/A'
+                        }
+        </StatisticsData>
       </StatisticsContainer>
 
-      <StatisticsContainer>
+      <StatisticsContainer onClick={toggleTimeSinceLastEventMode}>
         <StatisticsLabel>Time since last event:</StatisticsLabel>
-        <StatisticsData>{timeSinceLastEvent ? formatTime(timeSinceLastEvent) : 'N/A'}</StatisticsData>
+        <StatisticsData>{timeSinceLastEventMode === 'day-hour' 
+                          ? timeSinceLastEvent 
+                            ? `${formatTime(timeSinceLastEvent)}` 
+                            : 'N/A'
+                          : timeSinceLastEvent 
+                            ? `${(timeSinceLastEvent / (1000 * 60 * 60)).toFixed(2)} hours` 
+                            : 'N/A'
+                        }
+        </StatisticsData>
       </StatisticsContainer>
 
       <StatisticsContainer>
@@ -368,100 +445,120 @@ function App() {
       </StatisticsContainer>
 
 
-      <FullWidthChartContainer>
-      <Chart
-        options={{
-          chart: {
-            type: 'scatter',
-            zoom: {
-              type: 'xy'
+      <GenericButton onClick={() => setIsChartVisible(!isChartVisible)}>
+        {isChartVisible ? 'Hide Graph' : 'Show Graph'}
+      </GenericButton>
+      {isChartVisible ?
+      
+        <FullWidthChartContainer>
+        <Chart
+          options={{
+            chart: {
+              type: 'scatter',
+              zoom: {
+                type: 'xy'
+              },
+              toolbar: {
+                show: false
+              }
             },
-            toolbar: {
-              show: false
-            }
-          },
-          xaxis: {
-            type: 'datetime'
-          },
-          yaxis: {
-            reversed: true,
-            min: 0,
-            max: 24,
-            tickAmount: 8,
-            labels: {
-              formatter: function(val) {
-                return Math.floor(val) + ':00';
-              }
-            }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          grid: {
             xaxis: {
-              lines: {
-                show: true
-              }
+              type: 'datetime'
             },
             yaxis: {
-              lines: {
-                show: true
+              reversed: true,
+              min: 0,
+              max: 24,
+              tickAmount: 8,
+              labels: {
+                formatter: function(val) {
+                  return Math.floor(val) + ':00';
+                }
               }
             },
-          },
-          tooltip: {
-            x: {
-              format: 'dd MMM yyyy'
+            dataLabels: {
+              enabled: false
             },
-            y: {
-              formatter: function(val, opts) {
-                const index = Math.floor((opts.w.globals.seriesX[opts.seriesIndex][opts.dataPointIndex] % 1) * 100000);
-                return `Event #${index + 1}: ${Math.floor(val)}:00`;
+            grid: {
+              xaxis: {
+                lines: {
+                  show: true
+                }
+              },
+              yaxis: {
+                lines: {
+                  show: true
+                }
+              },
+            },
+            tooltip: {
+              x: {
+                format: 'dd MMM yyyy'
+              },
+              y: {
+                formatter: function(val, opts) {
+                  const index = Math.floor((opts.w.globals.seriesX[opts.seriesIndex][opts.dataPointIndex] % 1) * 100000);
+                  return `Event #${index + 1}: ${Math.floor(val)}:00`;
+                }
               }
             }
-          }
-        }}
-        series={[{
-          name: 'events',
-          data: chartData.map(data => ({x: data.x, y: data.y, color: data.color}))
-        }]}
-        type="scatter"
-        height={350}
-      />
-      </FullWidthChartContainer>
+          }}
+          series={[{
+            name: 'events',
+            data: chartData.map(data => ({x: data.x, y: data.y, color: data.color}))
+          }]}
+          type="scatter"
+          height={350}
+        />
+        </FullWidthChartContainer>
+
+      : null}
 
 
 
-  <h2>List of Events</h2>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
+    <h2>Recent Events</h2>
+    <div style={{ display: 'flex', alignItems: 'center' }}> 
+      <SortLabel>Sort:</SortLabel>
+      <SortButton onClick={toggleSortOrder}>
+        {sortNewestFirst ? 'Newest First' : 'Oldest First'}
+      </SortButton>
+    </div>
+  </div>
 
   <FullWidthTableContainer>
     <StyledTable>
       <thead>
-        <tr>
-          <th>Event #</th>
-          <th>Event Title</th>
-          <th>Date</th>
+        <tr>  
+          <th align="left">Date</th>
           <th align="right">Time</th>
         </tr>
       </thead>
       <tbody>
         {events
           .filter(event => event.summary.toLowerCase().includes(filter.toLowerCase()))
-          .sort((a, b) => new Date(b.start.dateTime || b.start.date) - new Date(a.start.dateTime || a.start.date))
+          .sort((a, b) => {
+            const dateA = new Date(a.start.dateTime || a.start.date);
+            const dateB = new Date(b.start.dateTime || b.start.date);
+            return sortNewestFirst ? dateB - dateA : dateA - dateB;
+          })
+          .slice(0, 10)
           .map((event, index) => {
             const date = new Date(event.start.dateTime || event.start.date);
             return (
-              <tr key={index} onClick={() => setSelectedEvent(index)}>
-                <td>{index + 1}</td>
-                <td>{event.summary}</td>
-                <td>{date.toLocaleDateString()}</td>
-                <td align="right">{date.toLocaleTimeString()}</td>
+              <tr key={index}>
+                <td>{formatDate(date)}</td>
+                <td align="right">{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
               </tr>
             );
-          })}
+          })
+        }
       </tbody>
     </StyledTable> 
   </FullWidthTableContainer>
+
+  {/* <GenericButton>Show All Events</GenericButton> */}
+  
   </MainPage>
   </StyledApp>
   );

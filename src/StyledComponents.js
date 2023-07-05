@@ -113,16 +113,99 @@ export const FullWidthChartContainer = styled.div`
 
 export const FullWidthTableContainer = styled.div`
   width: 100%;
+  background-color: white;
+  border-radius: 0.625rem;
+  overflow: hidden;
 `;
 
 export const StyledTable = styled.table`
   width: 100%;
+  border-collapse: separate;
+  padding: 1rem 1.25rem 0rem;
 
   th {
-    text-align: left !important;
+    color: #000;
+    font-size: 0.8125rem;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 400;
+    text-transform: uppercase;
+    opacity: 60%;
+    padding-bottom: 0.625rem;
   }
 
-  th:last-child, td:last-child {
-    text-align: right !important;
+  td {
+    color: #000;
+    font-family: Inter;
+    line-height: 140%;
+    padding: 1rem 0;
+    border-bottom: 0.03125rem solid rgba(128, 128, 128, 0.25);
   }
+
+  td:first-child {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  td:last-child {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-align: right;
+  }
+
+  tr:not(:last-child) {
+    background: white;
+  }
+
+  tr:last-child td {
+    border-bottom: none; // remove the border from the last row
+  }
+`;
+
+export const GenericButton = styled.button`
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.625rem;
+  background-color: #e3e3e3;
+  color: #111;
+  font-family: Inter;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 0.83rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #d9d9d9;
+  }
+`;
+
+export const SortLabel = styled.div`
+  color: #000;
+  text-align: right;
+  font-size: 1rem;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%;
+  margin-right: 0.5rem;
+`;
+
+export const SortButton = styled.button`
+  display: flex;
+  padding: 0.625rem 1rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  border-radius: 0.3125rem;
+  background: #E3E3E3;
+  color: #000;
+  text-align: center;
+  font-size: 0.71875rem;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  line-height: 140%;
+  cursor: pointer;
+  border: none;
 `;
