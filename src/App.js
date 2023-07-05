@@ -3,6 +3,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Chart from 'react-apexcharts';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import LoginPage from './LoginPage';
+import {StyledTable, FullWidthTableContainer, FullWidthChartContainer, MainPage, TrackerFrame, Tracker, TrackerText, StyledApp, StatisticsContainer, StatisticsData, StatisticsLabel } from "./StyledComponents";
+
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_API_KEY;
@@ -17,13 +20,13 @@ function App() {
   const [events, setEvents] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [calendarId, setCalendarId] = useState('primary');
-  const [eventCount, setEventCount] = useState(500);
   const [filter, setFilter] = useState('');
   const [averageTime, setAverageTime] = useState('');
   const [calendarList, setCalendarList] = useState([]);
   const [timeSinceLastEvent, setTimeSinceLastEvent] = useState(null);
   const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const [endDate, setEndDate] = useState(new Date()); // default to current date
+  const [eventCount, setEventCount] = useState(500); // Replace 10 with your desired default event count
 
 
 
@@ -65,7 +68,7 @@ function App() {
     } else {
       tokenClient.requestAccessToken({prompt: ''});
     }
-  }, []);
+  }, []);  
 
   const handleSignoutClick = useCallback(() => {
     const token = window.gapi.client.getToken();
@@ -240,7 +243,7 @@ function App() {
         'timeMax': endDate.toISOString(),
         'showDeleted': false,
         'singleEvents': true,
-        'maxResults': eventCount,
+        'maxResults': eventCount, // <--- Where is this declared?
         'orderBy': 'startTime',
       };
       response = await window.gapi.client.calendar.events.list(request);
@@ -255,7 +258,7 @@ function App() {
       return;
     }
     setEvents(events);
-  }  
+}  
 
   async function loadCalendarList() {
     try {
@@ -302,18 +305,26 @@ function App() {
 
   const uniqueTitles = [...new Set(events.map(event => event.summary))];
 
+  if (!isAuthorized) {
+    return <LoginPage onLogin={handleAuthClick} />;
+  }
+
   return (
-    <div>
-      <h1>Your Data</h1>
+    <StyledApp>
+    <MainPage>
       {isAuthorized ? (
         <div>
-          <button onClick={handleAuthClick}>{isAuthorized ? 'Connect Calendar' : 'Login'}</button>
+          <button onClick={handleAuthClick}>
+            {isAuthorized ? 'Connect Calendar' : 'Login'}
+          </button>
           <button onClick={handleSignoutClick}>Sign Out</button>
         </div>
       ) : (
-        <button onClick={handleAuthClick}>{isAuthorized ? 'Connect Calendar' : 'Login'}</button>
+        <button onClick={handleAuthClick}>
+          {isAuthorized ? 'Connect Calendar' : 'Login'}
+        </button>
       )}
-      <br/>
+
       <select
         value={calendarId}
         onChange={e => handleCalendarSelect(e.target.value)}
@@ -323,28 +334,50 @@ function App() {
         ))}
       </select>
       <button onClick={loadCalendar}>Set Calendar</button>
-      
+
       <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
       <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
 
-      <h2>Your Recurring Events</h2>
-      {uniqueTitles.map((title) => (
-        <button key={title} onClick={() => handleFilterByTitle(title)}>{title}</button>
-      ))}
-      <div>
-        <h2>Statistics</h2>
-        <p>Number of events logged: {events.filter(event => event.summary.toLowerCase().includes(filter.toLowerCase())).length}</p>
-        <p>Average time between events: {averageTime ? `${formatTime(averageTime)} (${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours)` : 'N/A'}</p>
-        <p>Time since last event: {timeSinceLastEvent ? formatTime(timeSinceLastEvent) : 'N/A'}</p>
-        <p>Completion Rate: {completionRate}%</p>
-      </div>
+      <TrackerFrame>
+        {uniqueTitles.map((title) => (
+          <Tracker key={title} onClick={() => handleFilterByTitle(title)}>
+            <TrackerText>{title}</TrackerText>
+          </Tracker>
+        ))}
+      </TrackerFrame>
 
+
+      <StatisticsContainer>
+        <StatisticsLabel>Number of events logged:</StatisticsLabel>
+        <StatisticsData>{events.filter(event => event.summary.toLowerCase().includes(filter.toLowerCase())).length}</StatisticsData>
+      </StatisticsContainer>
+
+      <StatisticsContainer>
+        <StatisticsLabel>Average time between events:</StatisticsLabel>
+        <StatisticsData>{averageTime ? `${formatTime(averageTime)} (${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours)` : 'N/A'}</StatisticsData>
+      </StatisticsContainer>
+
+      <StatisticsContainer>
+        <StatisticsLabel>Time since last event:</StatisticsLabel>
+        <StatisticsData>{timeSinceLastEvent ? formatTime(timeSinceLastEvent) : 'N/A'}</StatisticsData>
+      </StatisticsContainer>
+
+      <StatisticsContainer>
+        <StatisticsLabel>Completion Rate:</StatisticsLabel>
+        <StatisticsData>{completionRate}%</StatisticsData>
+      </StatisticsContainer>
+
+
+      <FullWidthChartContainer>
       <Chart
         options={{
           chart: {
             type: 'scatter',
             zoom: {
               type: 'xy'
+            },
+            toolbar: {
+              show: false
             }
           },
           xaxis: {
@@ -395,38 +428,42 @@ function App() {
         type="scatter"
         height={350}
       />
+      </FullWidthChartContainer>
 
 
 
   <h2>List of Events</h2>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Event #</th>
-        <th>Event Title</th>
-        <th>Date</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      {events
-        .filter(event => event.summary.toLowerCase().includes(filter.toLowerCase()))
-        .sort((a, b) => new Date(b.start.dateTime || b.start.date) - new Date(a.start.dateTime || a.start.date))
-        .map((event, index) => {
-          const date = new Date(event.start.dateTime || event.start.date);
-          return (
-            <tr key={index} onClick={() => setSelectedEvent(index)}>
-              <td>{index + 1}</td>
-              <td>{event.summary}</td>
-              <td>{date.toLocaleDateString()}</td>
-              <td>{date.toLocaleTimeString()}</td>
-            </tr>
-          );
-        })}
-    </tbody>
-  </table>
-  </div>
+  <FullWidthTableContainer>
+    <StyledTable>
+      <thead>
+        <tr>
+          <th>Event #</th>
+          <th>Event Title</th>
+          <th>Date</th>
+          <th align="right">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {events
+          .filter(event => event.summary.toLowerCase().includes(filter.toLowerCase()))
+          .sort((a, b) => new Date(b.start.dateTime || b.start.date) - new Date(a.start.dateTime || a.start.date))
+          .map((event, index) => {
+            const date = new Date(event.start.dateTime || event.start.date);
+            return (
+              <tr key={index} onClick={() => setSelectedEvent(index)}>
+                <td>{index + 1}</td>
+                <td>{event.summary}</td>
+                <td>{date.toLocaleDateString()}</td>
+                <td align="right">{date.toLocaleTimeString()}</td>
+              </tr>
+            );
+          })}
+      </tbody>
+    </StyledTable> 
+  </FullWidthTableContainer>
+  </MainPage>
+  </StyledApp>
   );
 
 }
