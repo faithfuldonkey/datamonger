@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import LoginPage from './LoginPage';
 import {SortButton, SortLabel, GenericButton, StyledTable, FullWidthTableContainer, FullWidthChartContainer, MainPage, TrackerFrame, Tracker, TrackerText, StyledApp, StatisticsContainer, StatisticsData, StatisticsLabel } from "./StyledComponents";
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
@@ -30,6 +31,8 @@ function App() {
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [sortNewestFirst, setSortNewestFirst] = useState(true);
   const [averageTimeMode, setAverageTimeMode] = useState('day-hour');
+  const [selectedTracker, setSelectedTracker] = useState("");
+
 
 
   useEffect(() => {
@@ -84,6 +87,7 @@ function App() {
 
   const handleFilterByTitle = useCallback((title) => {
     setFilter(title);
+    setSelectedTracker(title);
     calculateAverageTime(title);
   }, []);
 
@@ -407,14 +411,15 @@ function App() {
         ))}
       </TrackerFrame>
 
+      {selectedTracker && <h2>{selectedTracker}</h2>}
 
       <StatisticsContainer>
-        <StatisticsLabel>Number of events logged:</StatisticsLabel>
+        <StatisticsLabel>Total Count</StatisticsLabel>
         <StatisticsData>{events.filter(event => event.summary.toLowerCase().includes(filter.toLowerCase())).length}</StatisticsData>
       </StatisticsContainer>
 
       <StatisticsContainer onClick={toggleAverageTimeMode}>
-        <StatisticsLabel>Average time between events:</StatisticsLabel>
+        <StatisticsLabel>Average Between</StatisticsLabel>
         <StatisticsData>{averageTimeMode === 'day-hour' 
                           ? averageTime 
                             ? `${formatTime(averageTime)}` 
@@ -427,7 +432,7 @@ function App() {
       </StatisticsContainer>
 
       <StatisticsContainer onClick={toggleTimeSinceLastEventMode}>
-        <StatisticsLabel>Time since last event:</StatisticsLabel>
+        <StatisticsLabel>Time Since Last</StatisticsLabel>
         <StatisticsData>{timeSinceLastEventMode === 'day-hour' 
                           ? timeSinceLastEvent 
                             ? `${formatTime(timeSinceLastEvent)}` 
@@ -440,7 +445,7 @@ function App() {
       </StatisticsContainer>
 
       <StatisticsContainer>
-        <StatisticsLabel>Completion Rate:</StatisticsLabel>
+        <StatisticsLabel>Completion Rate</StatisticsLabel>
         <StatisticsData>{completionRate}%</StatisticsData>
       </StatisticsContainer>
 
@@ -519,7 +524,7 @@ function App() {
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
     <h2>Recent Events</h2>
     <div style={{ display: 'flex', alignItems: 'center' }}> 
-      <SortLabel>Sort:</SortLabel>
+      <SortLabel></SortLabel>
       <SortButton onClick={toggleSortOrder}>
         {sortNewestFirst ? 'Newest First' : 'Oldest First'}
       </SortButton>
