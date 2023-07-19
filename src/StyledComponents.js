@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import Modal from 'react-modal';
+
 
 export const StyledApp = styled.div`
   display: flex;
@@ -208,4 +210,20 @@ export const SortButton = styled.button`
   line-height: 140%;
   cursor: pointer;
   border: none;
+`;
+
+
+export const StyledIcon = styled.span`
+  cursor: pointer;
+`;
+
+export const StyledModal = styled(Modal)`
+  &__content {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
 `;
