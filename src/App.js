@@ -6,7 +6,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import LoginPage from "./LoginPage";
 import {
   StyledIcon,
-  StyledModal,
   SortButton,
   SortLabel,
   GenericButton,
@@ -21,6 +20,13 @@ import {
   StatisticsContainer,
   StatisticsData,
   StatisticsLabel,
+  HeaderContainer,
+  DateFilterDescription,
+  Separator,
+  DatePickerContainer,
+  DatePresetButton,
+  DateRangeContainer,
+  HeaderBar,
 } from "./StyledComponents";
 import "material-icons/iconfont/material-icons.css";
 
@@ -54,42 +60,94 @@ function App() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [datePreset, setDatePreset] = useState("Last 30 Days");
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-  const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(!isAuthorized);
+  const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(
+    !isAuthorized
+  );
+  const [dateFilterDescription, setDateFilterDescription] =
+    useState("Last 30 Days");
 
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    setDatePreset("Custom");
+  };
 
-  const handlePreset = useCallback((preset) => {
-    setDatePreset(preset);
-    let days;
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    setDatePreset("Custom");
+  };
 
+  const COLORS = [
+    "#F46F5C",
+    "#5CABF4",
+    "#BE9792",
+    "#BC79F1",
+    "#F4A55C",
+    "#8FD284",
+    "#84ADD2",
+    "#D284CA",
+    "#B4BF70",
+    "#5772B8",
+  ];
+
+  function getTrackerColor(title) {
+    const index = uniqueTitles.indexOf(title);
+    if (index === -1) return "#CCCCCC"; // Default gray color for unexpected cases
+    return COLORS[index % COLORS.length];
+  }
+
+  function formatToMMDDYYYY(dateObj) {
+    const month = dateObj.getMonth() + 1; // JavaScript months are 0-based
+    const day = dateObj.getDate();
+    const year = dateObj.getFullYear();
+
+    return `${month.toString().padStart(2, "0")}/${day
+      .toString()
+      .padStart(2, "0")}/${year}`;
+  }
+
+  useEffect(() => {
+    if (datePreset === "Custom") {
+      setDateFilterDescription(
+        `${formatToMMDDYYYY(startDate)} - ${formatToMMDDYYYY(endDate)}`
+      );
+    }
+  }, [startDate, endDate, datePreset]);
+
+  const handlePreset = (preset) => {
+    const now = new Date();
     switch (preset) {
       case "Last 30 Days":
-        days = 30;
+        setStartDate(new Date(now - 30 * 24 * 60 * 60 * 1000));
+        setEndDate(now);
+        setDatePreset("Last 30 Days");
+        setDateFilterDescription("Last 30 Days");
         break;
       case "Last 90 Days":
-        days = 90;
+        setStartDate(new Date(now - 90 * 24 * 60 * 60 * 1000));
+        setEndDate(now);
+        setDatePreset("Last 90 Days");
+        setDateFilterDescription("Last 90 Days");
         break;
       case "Last 365 Days":
-        days = 365;
+        setStartDate(new Date(now - 365 * 24 * 60 * 60 * 1000));
+        setEndDate(now);
+        setDatePreset("Last 365 Days");
+        setDateFilterDescription("Last 365 Days");
         break;
-      case "Custom":
-        setIsModalVisible(true); // Show date picker
-        return;
       case "All Time":
-        setStartDate(new Date(0)); // Set date to Unix epoch
-        setEndDate(new Date()); // Set date to now
-        return;
+        // Set appropriate dates for "All Time" if required
+        setDatePreset("All Time");
+        setDateFilterDescription("All Time");
+        break;
       default:
-        console.error("Invalid preset");
-        return;
+        setDatePreset("Custom");
+        break;
     }
+  };
 
-    const now = new Date();
-    const pastDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-
-    setStartDate(pastDate);
-    setEndDate(now);
-    setIsModalVisible(false); // Hide the modal
-  }, []);
+  const handleCloseTracker = () => {
+    setSelectedTracker(null);
+  };
 
   useEffect(() => {
     loadScript("https://apis.google.com/js/api.js", initializeGapiClient);
@@ -101,7 +159,7 @@ function App() {
       calculateAverageTime(filter);
       calculateTimeSinceLastEvent(filter);
     }
-  }, [filter]);
+  }, [events, filter]);
 
   useEffect(() => {
     listUpcomingEvents();
@@ -325,7 +383,10 @@ function App() {
 
   function calculateTimeSinceLastEvent(title) {
     const filteredEvents = events.filter(
-      (event) => event.summary.toLowerCase() === title.toLowerCase()
+      (event) =>
+        event.summary.toLowerCase() === title.toLowerCase() &&
+        new Date(event.start.dateTime || event.start.date) >= startDate &&
+        new Date(event.start.dateTime || event.start.date) <= endDate
     );
     if (filteredEvents.length === 0) {
       setTimeSinceLastEvent(null);
@@ -421,6 +482,11 @@ function App() {
       return;
     }
     setEvents(events);
+
+    // Set uniqueTitles only if it's empty
+    if (uniqueTitles.length === 0) {
+      setUniqueTitles([...new Set(events.map((event) => event.summary))]);
+    }
   }
 
   async function loadCalendarList() {
@@ -444,7 +510,10 @@ function App() {
 
   function calculateAverageTime(title) {
     const filteredEvents = events.filter(
-      (event) => event.summary.toLowerCase() === title.toLowerCase()
+      (event) =>
+        event.summary.toLowerCase() === title.toLowerCase() &&
+        new Date(event.start.dateTime || event.start.date) >= startDate &&
+        new Date(event.start.dateTime || event.start.date) <= endDate
     );
     if (filteredEvents.length < 2) {
       setAverageTime(null);
@@ -476,7 +545,7 @@ function App() {
     setSortNewestFirst((prevSortNewestFirst) => !prevSortNewestFirst);
   }, []);
 
-  const uniqueTitles = [...new Set(events.map((event) => event.summary))];
+  const [uniqueTitles, setUniqueTitles] = useState([]);
 
   if (!isAuthorized) {
     return <LoginPage onLogin={handleAuthClick} />;
@@ -485,20 +554,22 @@ function App() {
   return (
     <StyledApp>
       <MainPage>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            width: "100%",
-          }}
-        >
+        <HeaderBar>
+          {selectedTracker ? (
+            <StyledIcon className="material-icons" onClick={handleCloseTracker}>
+              close
+            </StyledIcon>
+          ) : (
+            <div style={{ width: "24px" }}></div> // Placeholder for spacing
+          )}
+
           <StyledIcon
             className="material-icons"
             onClick={() => setIsAccountMenuVisible(!isAccountMenuVisible)}
           >
             account_circle
           </StyledIcon>
-        </div>
+        </HeaderBar>
 
         {isAccountMenuVisible && (
           <div>
@@ -527,262 +598,262 @@ function App() {
           </div>
         )}
 
-        <TrackerFrame>
+        <TrackerFrame isSelected={!!selectedTracker}>
           {uniqueTitles.map((title) => (
-            <Tracker key={title} onClick={() => handleFilterByTitle(title)}>
+            <Tracker
+              key={title}
+              onClick={() => handleFilterByTitle(title)}
+              color={getTrackerColor(title)}
+              isSelected={!!selectedTracker}
+            >
               <TrackerText>{title}</TrackerText>
             </Tracker>
           ))}
         </TrackerFrame>
 
         {selectedTracker && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <h2>{selectedTracker}</h2>
-            <StyledIcon
-              className="material-icons"
-              onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
-            >
-              date_range
-            </StyledIcon>
-          </div>
-        )}
-
-        {isDatePickerVisible && (
-          <div>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-            />
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-            />
-
-            <button onClick={() => handlePreset("Last 30 Days")}>
-              Last 30 Days
-            </button>
-            <button onClick={() => handlePreset("Last 90 Days")}>
-              Last 90 Days
-            </button>
-            <button onClick={() => handlePreset("Last 365 Days")}>
-              Last 365 Days
-            </button>
-            <button onClick={() => handlePreset("All Time")}>All Time</button>
-          </div>
-        )}
-
-        <StyledModal
-          isOpen={isModalVisible}
-          onRequestClose={() => setIsModalVisible(false)}
-        >
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-          />
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-          />
-
-          <button onClick={() => handlePreset("Last 30 Days")}>
-            Last 30 Days
-          </button>
-          <button onClick={() => handlePreset("Last 90 Days")}>
-            Last 90 Days
-          </button>
-          <button onClick={() => handlePreset("Last 365 Days")}>
-            Last 365 Days
-          </button>
-          <button onClick={() => handlePreset("Custom")}>Custom</button>
-          <button onClick={() => handlePreset("All Time")}>All Time</button>
-        </StyledModal>
-
-        <StatisticsContainer>
-          <StatisticsLabel>Total Count</StatisticsLabel>
-          <StatisticsData>
-            {
-              events.filter((event) =>
-                event.summary.toLowerCase().includes(filter.toLowerCase())
-              ).length
-            }
-          </StatisticsData>
-        </StatisticsContainer>
-
-        <StatisticsContainer onClick={toggleAverageTimeMode}>
-          <StatisticsLabel>Average Between</StatisticsLabel>
-          <StatisticsData>
-            {averageTimeMode === "day-hour"
-              ? averageTime
-                ? `${formatTime(averageTime)}`
-                : "N/A"
-              : averageTime
-              ? `${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours`
-              : "N/A"}
-          </StatisticsData>
-        </StatisticsContainer>
-
-        <StatisticsContainer onClick={toggleTimeSinceLastEventMode}>
-          <StatisticsLabel>Time Since Last</StatisticsLabel>
-          <StatisticsData>
-            {timeSinceLastEventMode === "day-hour"
-              ? timeSinceLastEvent
-                ? `${formatTime(timeSinceLastEvent)}`
-                : "N/A"
-              : timeSinceLastEvent
-              ? `${(timeSinceLastEvent / (1000 * 60 * 60)).toFixed(2)} hours`
-              : "N/A"}
-          </StatisticsData>
-        </StatisticsContainer>
-
-        <StatisticsContainer>
-          <StatisticsLabel>Completion Rate</StatisticsLabel>
-          <StatisticsData>{completionRate}%</StatisticsData>
-        </StatisticsContainer>
-
-        <GenericButton onClick={() => setIsChartVisible(!isChartVisible)}>
-          {isChartVisible ? "Hide Graph" : "Show Graph"}
-        </GenericButton>
-        {isChartVisible ? (
-          <FullWidthChartContainer>
-            <Chart
-              options={{
-                chart: {
-                  type: "scatter",
-                  zoom: {
-                    type: "xy",
-                  },
-                  toolbar: {
-                    show: false,
-                  },
-                },
-                xaxis: {
-                  type: "datetime",
-                },
-                yaxis: {
-                  reversed: true,
-                  min: 0,
-                  max: 24,
-                  tickAmount: 8,
-                  labels: {
-                    formatter: function (val) {
-                      return Math.floor(val) + ":00";
-                    },
-                  },
-                },
-                dataLabels: {
-                  enabled: false,
-                },
-                grid: {
-                  xaxis: {
-                    lines: {
-                      show: true,
-                    },
-                  },
-                  yaxis: {
-                    lines: {
-                      show: true,
-                    },
-                  },
-                },
-                tooltip: {
-                  x: {
-                    format: "dd MMM yyyy",
-                  },
-                  y: {
-                    formatter: function (val, opts) {
-                      const index = Math.floor(
-                        (opts.w.globals.seriesX[opts.seriesIndex][
-                          opts.dataPointIndex
-                        ] %
-                          1) *
-                          100000
-                      );
-                      return `Event #${index + 1}: ${Math.floor(val)}:00`;
-                    },
-                  },
-                },
+          <>
+            <HeaderContainer
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
               }}
-              series={[
+            >
+              <h1>{selectedTracker}</h1>
+              <DateFilterDescription>
+                {dateFilterDescription}
+              </DateFilterDescription>
+              <StyledIcon
+                className="material-icons"
+                onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
+              >
+                date_range
+              </StyledIcon>
+            </HeaderContainer>
+
+            {isDatePickerVisible && (
+              <DatePickerContainer>
+                <DateRangeContainer>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handleStartDateChange}
+                  />
+                  <DatePicker
+                    selected={endDate}
+                    onChange={handleEndDateChange}
+                  />
+                </DateRangeContainer>
+
+                <div>
+                  <DatePresetButton
+                    onClick={() => handlePreset("Last 30 Days")}
+                  >
+                    Last 30 Days
+                  </DatePresetButton>
+                  <DatePresetButton
+                    onClick={() => handlePreset("Last 90 Days")}
+                  >
+                    Last 90 Days
+                  </DatePresetButton>
+                  <DatePresetButton
+                    onClick={() => handlePreset("Last 365 Days")}
+                  >
+                    Last 365 Days
+                  </DatePresetButton>
+                  <DatePresetButton onClick={() => handlePreset("All Time")}>
+                    All Time
+                  </DatePresetButton>
+                </div>
+              </DatePickerContainer>
+            )}
+
+            <Separator color={getTrackerColor(selectedTracker)} />
+
+            <StatisticsContainer onClick={toggleTimeSinceLastEventMode}>
+              <StatisticsLabel>Time Since Last</StatisticsLabel>
+              <StatisticsData>
+                {timeSinceLastEventMode === "day-hour"
+                  ? timeSinceLastEvent
+                    ? `${formatTime(timeSinceLastEvent)}`
+                    : "N/A"
+                  : timeSinceLastEvent
+                  ? `${(timeSinceLastEvent / (1000 * 60 * 60)).toFixed(
+                      2
+                    )} hours`
+                  : "N/A"}
+              </StatisticsData>
+            </StatisticsContainer>
+
+            <StatisticsContainer>
+              <StatisticsLabel>Total Count</StatisticsLabel>
+              <StatisticsData>
                 {
-                  name: "events",
-                  data: chartData.map((data) => ({
-                    x: data.x,
-                    y: data.y,
-                    color: data.color,
-                  })),
-                },
-              ]}
-              type="scatter"
-              height={350}
-            />
-          </FullWidthChartContainer>
-        ) : null}
+                  events.filter((event) =>
+                    event.summary.toLowerCase().includes(filter.toLowerCase())
+                  ).length
+                }
+              </StatisticsData>
+            </StatisticsContainer>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <h2>Recent Events</h2>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <SortLabel></SortLabel>
-            <SortButton onClick={toggleSortOrder}>
-              {sortNewestFirst ? "Newest First" : "Oldest First"}
-            </SortButton>
-          </div>
-        </div>
+            <StatisticsContainer onClick={toggleAverageTimeMode}>
+              <StatisticsLabel>Average Between</StatisticsLabel>
+              <StatisticsData>
+                {averageTimeMode === "day-hour"
+                  ? averageTime
+                    ? `${formatTime(averageTime)}`
+                    : "N/A"
+                  : averageTime
+                  ? `${(averageTime / (1000 * 60 * 60)).toFixed(2)} hours`
+                  : "N/A"}
+              </StatisticsData>
+            </StatisticsContainer>
 
-        <FullWidthTableContainer>
-          <StyledTable>
-            <thead>
-              <tr>
-                <th align="left">Date</th>
-                <th align="right">Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events
-                .filter((event) =>
-                  event.summary.toLowerCase().includes(filter.toLowerCase())
-                )
-                .sort((a, b) => {
-                  const dateA = new Date(a.start.dateTime || a.start.date);
-                  const dateB = new Date(b.start.dateTime || b.start.date);
-                  return sortNewestFirst ? dateB - dateA : dateA - dateB;
-                })
-                .slice(0, 10)
-                .map((event, index) => {
-                  const date = new Date(
-                    event.start.dateTime || event.start.date
-                  );
-                  return (
-                    <tr key={index}>
-                      <td>{formatDate(date)}</td>
-                      <td align="right">
-                        {date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </StyledTable>
-        </FullWidthTableContainer>
+            <StatisticsContainer>
+              <StatisticsLabel>Completion Rate</StatisticsLabel>
+              <StatisticsData>{completionRate}%</StatisticsData>
+            </StatisticsContainer>
 
-        {/* <GenericButton>Show All Events</GenericButton> */}
+            <GenericButton onClick={() => setIsChartVisible(!isChartVisible)}>
+              {isChartVisible ? "Hide Graph" : "Show Graph"}
+            </GenericButton>
+            {isChartVisible ? (
+              <FullWidthChartContainer>
+                <Chart
+                  options={{
+                    chart: {
+                      type: "scatter",
+                      zoom: {
+                        type: "xy",
+                      },
+                      toolbar: {
+                        show: false,
+                      },
+                    },
+                    xaxis: {
+                      type: "datetime",
+                    },
+                    yaxis: {
+                      reversed: true,
+                      min: 0,
+                      max: 24,
+                      tickAmount: 8,
+                      labels: {
+                        formatter: function (val) {
+                          return Math.floor(val) + ":00";
+                        },
+                      },
+                    },
+                    dataLabels: {
+                      enabled: false,
+                    },
+                    grid: {
+                      xaxis: {
+                        lines: {
+                          show: true,
+                        },
+                      },
+                      yaxis: {
+                        lines: {
+                          show: true,
+                        },
+                      },
+                    },
+                    tooltip: {
+                      x: {
+                        format: "dd MMM yyyy",
+                      },
+                      y: {
+                        formatter: function (val, opts) {
+                          const index = Math.floor(
+                            (opts.w.globals.seriesX[opts.seriesIndex][
+                              opts.dataPointIndex
+                            ] %
+                              1) *
+                              100000
+                          );
+                          return `Event #${index + 1}: ${Math.floor(val)}:00`;
+                        },
+                      },
+                    },
+                  }}
+                  series={[
+                    {
+                      name: "events",
+                      data: chartData.map((data) => ({
+                        x: data.x,
+                        y: data.y,
+                        color: data.color,
+                      })),
+                    },
+                  ]}
+                  type="scatter"
+                  height={350}
+                />
+              </FullWidthChartContainer>
+            ) : null}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <h2>Recent Events</h2>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <SortLabel></SortLabel>
+                <SortButton onClick={toggleSortOrder}>
+                  {sortNewestFirst ? "Newest First" : "Oldest First"}
+                </SortButton>
+              </div>
+            </div>
+
+            <FullWidthTableContainer>
+              <StyledTable>
+                <thead>
+                  <tr>
+                    <th align="left">Date</th>
+                    <th align="right">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events
+                    .filter((event) =>
+                      event.summary.toLowerCase().includes(filter.toLowerCase())
+                    )
+                    .sort((a, b) => {
+                      const dateA = new Date(a.start.dateTime || a.start.date);
+                      const dateB = new Date(b.start.dateTime || b.start.date);
+                      return sortNewestFirst ? dateB - dateA : dateA - dateB;
+                    })
+                    .slice(0, 10)
+                    .map((event, index) => {
+                      const date = new Date(
+                        event.start.dateTime || event.start.date
+                      );
+                      return (
+                        <tr key={index}>
+                          <td>{formatDate(date)}</td>
+                          <td align="right">
+                            {date.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </StyledTable>
+            </FullWidthTableContainer>
+
+            {/* <GenericButton>Show All Events</GenericButton> */}
+          </>
+        )}
       </MainPage>
     </StyledApp>
   );
