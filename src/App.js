@@ -3,7 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import { loadCalendarList, listEvents } from "./services/authService";
 import { StyledApp, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
-import TrackerFrame from "./components/Trackers/TrackerFrame/TrackerFrame";
+import TrackerList from "./components/Trackers/TrackerList/TrackerList";
 import CustomDatePicker from "./components/DatePicker/CustomDatePicker/CustomDatePicker";
 import DateFilterDescription from "./components/Common/DateFilterDescription/DateFilterDescription";
 import StatisticsContainer from "./components/Statistics/StatisticsContainer/StatisticsContainer";

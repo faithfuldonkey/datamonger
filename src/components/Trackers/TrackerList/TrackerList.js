@@ -1,5 +1,5 @@
 import React from "react";
-import { StyledTrackerFrame } from "./TrackerFrame.styles";
+import { StyledTrackerFrame } from "./TrackerList.styles";
 import Tracker from "../Tracker/Tracker";
 import { getTrackerColor } from "../../../utils/constants";
 
