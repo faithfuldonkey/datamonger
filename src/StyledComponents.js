@@ -6,24 +6,24 @@ export const StyledApp = styled.div`
   align-items: center;
   width: 100%;
   overflow-x: hidden;
+  background-color: #f8f8f8;
 `;
 
 export const MainPage = styled.div`
   display: flex;
-  width: 100%;
-  max-width: 50%; /* Added this line */
-  padding: 1rem 2rem 2rem 2rem;
   flex-direction: column;
-  align-items: flex-start;
-  background: #f8f8f8;
-  min-height: 100vh;
+  align-items: center;
+  justify-content: flex-start;
 
-  /* Responsive design: Adjust for smaller screens */
-  @media (max-width: 768px) {
-    /* This is generally the breakpoint for tablets and below */
-    max-width: 90%;
-  }
+  width: 100%;
+  max-width: 1200px; /* Optional: Constrain to a reasonable width */
+  margin: 0 auto;
+  padding: 16px; /* Add padding to prevent content from touching the edges */
+  box-sizing: border-box; /* Include padding in width calculation */
+
+  overflow: hidden; /* Ensure content doesn't overflow */
 `;
+
 
 export const TrackerFrame = styled.div`
   display: flex;
