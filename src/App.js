@@ -17,6 +17,7 @@ import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails"
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
 import GlobalStyle from "./styles/GlobalStyles";
+import { AuthProvider } from './contexts/AuthContext';
 
 
 
@@ -37,12 +38,12 @@ const App = () => {
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
   const [sortNewestFirst, setSortNewestFirst] = useState(true);
 
-  // Define the handleTrackerClick function
+  
   const handleTrackerClick = (tracker) => {
-    setSelectedGroup(tracker); // Update the selected group
+    setSelectedGroup(tracker); 
   };
 
-  // Save access token and calendar ID to localStorage
+  
   useEffect(() => {
     if (accessToken) {
       localStorage.setItem("accessToken", accessToken);
@@ -55,20 +56,20 @@ const App = () => {
     }
   }, [calendarId]);
 
-  // Load calendars on authorization
+  
   useEffect(() => {
     const savedToken = localStorage.getItem("accessToken");
     if (isAuthorized || savedToken) {
       loadCalendarList(savedToken || accessToken).then((calendarList) => {
         setCalendars(calendarList);
         if (!calendarId && calendarList.length > 0) {
-          setCalendarId(calendarList[0].id); // Default to the first calendar
+          setCalendarId(calendarList[0].id); 
         }
       });
     }
   }, [isAuthorized, accessToken]);
 
-  // Load events when calendar or dates change
+  
   useEffect(() => {
     const savedToken = localStorage.getItem("accessToken");
     if ((calendarId && isAuthorized) || savedToken) {
@@ -112,6 +113,7 @@ const App = () => {
   return (
     <>
       <GlobalStyle /> {/* Global styles applied here */}
+      <AuthProvider>
       <StyledApp>
         <MainPage>
           <HeaderBar
@@ -131,16 +133,16 @@ const App = () => {
           {selectedGroup ? (
             <TrackerDetails
               groupTitle={selectedGroup}
-              events={groupedEvents[selectedGroup] || []} // Default to an empty array if undefined
-              trackers={Object.keys(groupedEvents)} // Pass all tracker titles
+              events={groupedEvents[selectedGroup] || []} 
+              trackers={Object.keys(groupedEvents)} 
               onBackClick={() => setSelectedGroup(null)}
-              onTrackerClick={handleTrackerClick} // Pass the click handler
-              startDate={startDate} // Pass start date
-              endDate={endDate} // Pass end date
+              onTrackerClick={handleTrackerClick} 
+              startDate={startDate} 
+              endDate={endDate} 
               onDateChange={(newStartDate, newEndDate) => {
                 setStartDate(newStartDate);
                 setEndDate(newEndDate);
-              }} // Handle date changes
+              }} 
             />
           ) : (
             <GroupedEvents
@@ -150,6 +152,7 @@ const App = () => {
           )}
         </MainPage>
       </StyledApp>
+      </AuthProvider>
     </>
   );
 };

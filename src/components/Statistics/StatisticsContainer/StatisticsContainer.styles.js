@@ -2,31 +2,36 @@ import styled from "styled-components";
 
 export const StyledStatisticsContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  margin: 8px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
+  height: 4rem;
+  padding: 0.9375rem 1.25rem; /* Match old padding */
+  justify-content: space-between; /* Add space between label and data */
+  align-items: center; /* Center vertically */
+  flex-shrink: 0; /* Prevent shrinking */
+  align-self: stretch; /* Stretch to the container width */
+  border-radius: 0.625rem; /* Rounded corners */
+  background: #fff; /* White background */
+  margin: 0.3125rem 0; /* Vertical margin */
 `;
 
-export const StatisticsLabel = styled.div`
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
+export const StatisticsLabel = styled.span`
+  color: #000; /* Black text */
+  font-size: 1rem; /* Match old font size */
+  font-family: "Inter", sans-serif; /* Font family */
+  font-style: normal;
+  font-weight: 400; /* Normal weight for label */
+  line-height: 140%;
+  text-align: left; /* Align label to the left */
 `;
 
 export const StatisticsData = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0; /* Prevent shrinking and allow full width */
+  color: #000; /* Black text */
+  text-align: right; /* Align data to the right */
+  font-size: 1rem; /* Match old font size */
+  font-family: "Inter", sans-serif; /* Font family */
+  font-style: normal;
+  font-weight: 700; /* Bold weight for data */
+  line-height: 140%;
 `;

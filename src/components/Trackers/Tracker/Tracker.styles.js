@@ -2,20 +2,26 @@ import styled from "styled-components";
 
 export const StyledTracker = styled.button`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-width: 150px; /* Set consistent minimum width */
-  max-width: 200px; /* Optional for responsive scaling */
-  height: 60px; /* Consistent height for all trackers */
-  padding: 0.5rem;
-  border: none;
-  border-radius: 8px;
-  background-color: ${(props) => props.color || "#e0e0e0"};
   color: #fff;
-  font-size: 1rem;
   font-weight: bold;
   text-align: center;
+  flex: 1 0 0px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 0.625rem;
+  border: none;
+  background-color: ${(props) => props.color || "#e0e0e0"};
+  transition: background-color 0.3s;
   cursor: pointer;
+
+  padding: ${({ isInDetailsView }) =>
+    isInDetailsView ? "0.5rem 0.25rem" : "1rem 0.625rem"};
+  min-width: ${({ isInDetailsView }) => (isInDetailsView ? "8rem" : "150px")};
+  max-width: ${({ isInDetailsView }) => (isInDetailsView ? "31.25rem" : "500px")};  height: ${({ isInDetailsView }) => (isInDetailsView ? "3rem" : "80px")};
+
   transition: transform 0.2s ease, filter 0.2s ease;
 
   &:hover {
@@ -27,32 +33,9 @@ export const StyledTracker = styled.button`
   }
 `;
 
-
-
 export const TrackerText = styled.span`
   font-size: 14px;
   font-weight: bold;
-  color: #FFF;
+  color: #fff;
   text-align: center;
 `;
-
-export const Tracker = styled.button`
-  display: flex;
-  min-width: ${({ isSelected }) => (isSelected ? "8rem" : "150px")};
-  max-width: ${({ isSelected }) => (isSelected ? "31.25rem" : "calc(33.33% - 1rem)")}; /* Adjust width for wrapping */
-  padding: ${({ isSelected }) => (isSelected ? "1rem 0.625rem" : "2rem 4rem")};
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  flex: ${({ isSelected }) => (isSelected ? "1 0 auto" : "1 1 calc(33.33% - 1rem)")}; /* Equal spacing in wrap mode */
-  border-radius: 0.625rem;
-  border: none;
-  background-color: ${({ color }) => color || "#f46f5c"};
-  transition: background-color 0.3s ease;
-  cursor: pointer;
-
-  &:hover {
-    filter: brightness(90%);
-  }
-`;
-

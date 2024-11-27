@@ -11,6 +11,7 @@ const TrackerFrame = ({ trackers, selectedTracker, onTrackerClick }) => (
         title={title}
         color={getTrackerColor(title, trackers)} // Ensure `trackers` is passed
         isSelected={selectedTracker === title}
+        isInDetailsView={!!selectedTracker} // Pass this dynamically
         onClick={() => onTrackerClick(title)}
       />
     ))}

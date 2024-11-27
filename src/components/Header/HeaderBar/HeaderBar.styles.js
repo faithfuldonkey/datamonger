@@ -4,9 +4,6 @@ export const StyledHeaderBar = styled.header`
   display: flex;
   justify-content: space-between; /* Space out the left, center, and right sections */
   align-items: center;
-  padding: 16px;
-  background-color: #ffffff;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -18,7 +15,7 @@ export const StyledHeaderBar = styled.header`
 export const StyledIcon = styled.span`
   cursor: pointer;
   font-size: 24px;
-  color: #333;
+  color: #111;
 
   &:hover {
     color: #555;

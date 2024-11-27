@@ -18,7 +18,7 @@ export const MainPage = styled.div`
   width: 100%;
   max-width: 1200px; /* Optional: Constrain to a reasonable width */
   margin: 0 auto;
-  padding: 16px; /* Add padding to prevent content from touching the edges */
+  padding: 20px; /* Add padding to prevent content from touching the edges */
   box-sizing: border-box; /* Include padding in width calculation */
 
   overflow: hidden; /* Ensure content doesn't overflow */

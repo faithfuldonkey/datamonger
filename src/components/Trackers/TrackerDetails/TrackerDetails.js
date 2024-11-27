@@ -34,66 +34,73 @@ const TrackerDetails = ({
           <Tracker
             key={tracker}
             title={tracker}
-            color={getTrackerColor(tracker, trackers)} // Pass the color dynamically
+            color={getTrackerColor(tracker, trackers)}
             isSelected={tracker === groupTitle}
+            isInDetailsView={!!groupTitle} // Dynamically pass whether details view is active
             onClick={() => onTrackerClick(tracker)}
           />
         ))}
       </TrackerListContainer>
 
-      <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
-        <h1>{groupTitle}</h1>
-        <StyledIcon
-          className="material-icons"
-          onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
-        >
-          date_range
-        </StyledIcon>
-        {isDatePickerVisible && (
-          <CustomDatePicker
-            startDate={startDate}
-            endDate={endDate}
-            onDateChange={onDateChange}
+      {groupTitle && (
+  <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
+    <div className="header-row">
+      <h1>{groupTitle}</h1>
+      <StyledIcon
+        className="material-icons"
+        onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
+      >
+        date_range
+      </StyledIcon>
+    </div>
+      {isDatePickerVisible && (
+            <CustomDatePicker
+              startDate={startDate}
+              endDate={endDate}
+              onDateChange={onDateChange}
+            />
+          )}
+    <div className="separator" />
+  </HeaderContainer>
+)}
+
+      {groupTitle && (
+        <StatisticsContainer>
+          <TimeSinceLast events={events} />
+          <TotalCount events={events} />
+          <AverageTimeBetween events={events} />
+        </StatisticsContainer>
+      )}
+
+      {groupTitle && (
+        <EventsTableContainer>
+          <h2>Recent Events</h2>
+          <Table
+            headers={[{ label: "Date" }, { label: "Time" }]}
+            rows={events
+              .slice()
+              .sort((a, b) => {
+                const dateA = new Date(a.start.dateTime || a.start.date);
+                const dateB = new Date(b.start.dateTime || b.start.date);
+                return dateB - dateA;
+              })
+              .map((event) => {
+                const date = new Date(event.start.dateTime || event.start.date);
+                return [
+                  { content: formatDate(date), align: "left" },
+                  {
+                    content: date.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    }),
+                    align: "right",
+                  },
+                ];
+              })}
           />
-        )}
-        <div className="separator" />
-      </HeaderContainer>
-
-      {/* Statistics Section */}
-      <StatisticsContainer>
-        <TimeSinceLast events={events} />
-        <TotalCount events={events} />
-        <AverageTimeBetween events={events} />
-      </StatisticsContainer>
-
-      {/* Events Table Section */}
-      <EventsTableContainer>
-        <h2>Recent Events</h2>
-        <Table
-          headers={[{ label: "Date" }, { label: "Time" }]}
-          rows={events
-            .slice() // Create a shallow copy of the events array
-            .sort((a, b) => {
-              const dateA = new Date(a.start.dateTime || a.start.date);
-              const dateB = new Date(b.start.dateTime || b.start.date);
-              return dateB - dateA; // Sort in descending order (newest first)
-            })
-            .map((event) => {
-              const date = new Date(event.start.dateTime || event.start.date);
-              return [
-                { content: formatDate(date), align: "left" },
-                {
-                  content: date.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  }),
-                  align: "right",
-                },
-              ];
-            })}
-        />
-      </EventsTableContainer>
+        </EventsTableContainer>
+      )}
     </TrackerDetailsContainer>
   );
 };

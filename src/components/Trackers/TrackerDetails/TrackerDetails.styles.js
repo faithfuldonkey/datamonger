@@ -4,11 +4,6 @@ export const TrackerDetailsContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 16px;
-  background-color: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-
   width: 100%;
   max-width: 100%;
   overflow: hidden;
@@ -18,24 +13,33 @@ export const TrackerDetailsContainer = styled.div`
 
 export const HeaderContainer = styled.div`
   display: flex;
-  flex-direction: column; /* Adjusted to stack the h1 and separator */
-  justify-content: flex-start;
-  align-items: flex-start;
+  flex-direction: column; /* Keep the separator below the header row */
   width: 100%;
+
+  .header-row {
+    display: flex;
+    flex-direction: row; /* Align header and icon horizontally */
+    justify-content: space-between; /* Space between the text and icon */
+    align-items: center; /* Center vertically */
+    width: 100%;
+  }
 
   h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    text-align: left; /* Ensure text stays left-aligned */
+    flex-grow: 1; /* Push the icon to the far right */
   }
 
   .separator {
     width: 100%;
-    height: 4px;
+    height: 5px;
     margin-top: 8px;
-    background-color: ${({ color }) => color || "#ccc"}; /* Default fallback color */
-    border-radius: 2px;
+    background-color: ${({ color }) => color || "#ccc"}; /* Fallback color */
   }
 `;
+
+
 
 
 export const TrackerListContainer = styled.div`
@@ -43,10 +47,6 @@ export const TrackerListContainer = styled.div`
   flex-wrap: nowrap;
   gap: 12px;
   overflow-x: auto;
-  padding: 8px;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
 
   /* Hide scrollbars visually */
   -ms-overflow-style: none; /* IE and Edge */
@@ -59,7 +59,6 @@ export const TrackerListContainer = styled.div`
 export const StatisticsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 `;
 
 export const EventsTableContainer = styled.div`
