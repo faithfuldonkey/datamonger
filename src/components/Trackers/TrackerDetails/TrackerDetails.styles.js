@@ -72,7 +72,7 @@ export const EventsTableContainer = styled.div`
 export const StyledIcon = styled.span`
   cursor: pointer;
   font-size: 1.5rem;
-  color: ${({ color }) => color || "#555"};
+  color: #111;
   align-self: center; /* Align vertically in the header */
   margin-left: auto; /* Push the icon to the far right */
 `;

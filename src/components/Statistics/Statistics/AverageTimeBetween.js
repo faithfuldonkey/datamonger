@@ -1,5 +1,6 @@
 import React from "react";
 import StatisticsContainer from "../StatisticsContainer/StatisticsContainer";
+import { formatTimeDifference } from "../../../utils/formatters";
 
 const AverageTimeBetween = ({ events }) => {
   const calculateAverageTime = () => {
@@ -9,14 +10,11 @@ const AverageTimeBetween = ({ events }) => {
     for (let i = 0; i < events.length - 1; i++) {
       const date1 = new Date(events[i].start.dateTime || events[i].start.date);
       const date2 = new Date(events[i + 1].start.dateTime || events[i + 1].start.date);
-      const difference = Math.abs(date2 - date1);
-      totalDifference += difference;
+      totalDifference += Math.abs(date2 - date1);
     }
 
     const avgDiff = totalDifference / (events.length - 1);
-    const hours = Math.floor(avgDiff / (1000 * 60 * 60));
-    const minutes = Math.floor((avgDiff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours} hours ${minutes} minutes`;
+    return formatTimeDifference(avgDiff);
   };
 
   return (

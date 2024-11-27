@@ -43,26 +43,26 @@ const TrackerDetails = ({
       </TrackerListContainer>
 
       {groupTitle && (
-  <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
-    <div className="header-row">
-      <h1>{groupTitle}</h1>
-      <StyledIcon
-        className="material-icons"
-        onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
-      >
-        date_range
-      </StyledIcon>
-    </div>
-      {isDatePickerVisible && (
+        <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
+          <div className="header-row">
+            <h1>{groupTitle}</h1>
+            <StyledIcon
+              className="material-icons"
+              onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
+            >
+              date_range
+            </StyledIcon>
+          </div>
+          {isDatePickerVisible && (
             <CustomDatePicker
               startDate={startDate}
               endDate={endDate}
               onDateChange={onDateChange}
             />
           )}
-    <div className="separator" />
-  </HeaderContainer>
-)}
+          <div className="separator" />
+        </HeaderContainer>
+      )}
 
       {groupTitle && (
         <StatisticsContainer>
@@ -76,7 +76,10 @@ const TrackerDetails = ({
         <EventsTableContainer>
           <h2>Recent Events</h2>
           <Table
-            headers={[{ label: "Date" }, { label: "Time" }]}
+            headers={[
+              { label: "Date", align: "left" },
+              { label: "Time", align: "right" },
+            ]}
             rows={events
               .slice()
               .sort((a, b) => {

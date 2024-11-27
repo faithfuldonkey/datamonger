@@ -7,6 +7,7 @@ export const StyledHeaderBar = styled.header`
   position: sticky;
   top: 0;
   z-index: 1000;
+  padding-bottom: 1rem;
 
   width: 100%; /* Ensure it spans the full width of the app */
   box-sizing: border-box; /* Include padding in the width calculation */

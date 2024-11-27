@@ -4,10 +4,9 @@ export const StyledTrackerFrame = styled.div`
   display: flex;
   flex-wrap: wrap; /* Allow wrapping */
   gap: 1rem; /* Consistent spacing */
-  padding-top: 1rem;
   justify-content: space-between; /* Spread items evenly across rows */
   width: 100%; /* Ensure the container takes full width */
-  
+
   /* Scroll behavior for selected state */
   overflow-x: ${({ isSelected }) => (isSelected ? "scroll" : "hidden")};
   overflow-y: ${({ isSelected }) => (isSelected ? "hidden" : "auto")};
