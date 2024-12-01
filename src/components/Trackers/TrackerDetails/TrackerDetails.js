@@ -21,14 +21,14 @@ const TrackerDetails = ({
   groupTitle,
   events,
   trackers = [],
-  allTrackers = [], // Add this prop for all detected trackers
+  allTrackers = [],
   onTrackerClick,
   startDate,
   endDate,
   onDateChange,
 }) => {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Last 30 Days"); // Default to "Last 30 Days"
+  const [selectedFilter, setSelectedFilter] = useState("All Time");
 
   // Ensure the full list of trackers is sorted consistently
   const sortedAllTrackers = allTrackers.slice().sort();

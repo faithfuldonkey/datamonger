@@ -31,11 +31,18 @@ const CustomDatePicker = ({ startDate, endDate, onDateChange, onPresetSelect }) 
         new Date(),
       ],
     },
+    {
+      label: "All Time",
+      value: [
+        new Date("1970-01-01T00:00:00Z"),
+        new Date(),
+      ],
+    },
   ];
 
   useEffect(() => {
     if (onPresetSelect) {
-      const defaultPreset = presets[2];
+      const defaultPreset = presets[3];
       onDateChange(defaultPreset.value[0], defaultPreset.value[1]);
       onPresetSelect(defaultPreset.label);
     }

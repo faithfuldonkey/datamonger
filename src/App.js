@@ -24,7 +24,7 @@ const App = () => {
   const [calendars, setCalendars] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [startDate, setStartDate] = useState(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    new Date("1970-01-01T00:00:00Z"),
   );
   const [endDate, setEndDate] = useState(new Date());
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
