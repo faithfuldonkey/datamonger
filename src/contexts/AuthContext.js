@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { initializeGisClient, requestAccessToken } from "../services/authService";
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
@@ -9,18 +9,30 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const handleAuthClick = useCallback(() => {
-    requestAccessToken();
-  }, []);
-
-  const initializeAuth = useCallback(() => {
-    initializeGisClient(CLIENT_ID, SCOPES, () => {
-      setIsAuthorized(true);
+  useEffect(() => {
+    // Initialize the GIS client and check for saved token
+    initializeGisClient(CLIENT_ID, SCOPES, (token) => {
+      setIsAuthorized(true); // Token is valid, mark as authorized
     });
   }, []);
 
+  const handleAuthClick = () => {
+    requestAccessToken();
+  };
+
+  const handleSignoutClick = () => {
+    localStorage.removeItem("accessToken");
+    setIsAuthorized(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthorized, handleAuthClick, initializeAuth }}>
+    <AuthContext.Provider
+      value={{
+        isAuthorized,
+        handleAuthClick,
+        handleSignoutClick,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

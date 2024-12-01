@@ -14,7 +14,7 @@ import {
   TrackerListContainer,
   StatisticsContainer,
   EventsTableContainer,
-  StyledIcon, 
+  StyledIcon,
 } from "./TrackerDetails.styles";
 
 const TrackerDetails = ({
@@ -28,15 +28,18 @@ const TrackerDetails = ({
 }) => {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Last 30 Days"); // Default to "Last 30 Days"
-  
+
+  // Sort trackers alphabetically (or by any consistent criteria)
+  const sortedTrackers = trackers.slice().sort();
+
   return (
     <TrackerDetailsContainer>
       <TrackerListContainer>
-        {trackers.map((tracker) => (
+        {sortedTrackers.map((tracker) => (
           <Tracker
             key={tracker}
             title={tracker}
-            color={getTrackerColor(tracker, trackers)}
+            color={getTrackerColor(tracker, sortedTrackers)} // Use sorted trackers
             isSelected={tracker === groupTitle}
             isInDetailsView={!!groupTitle}
             onClick={() => onTrackerClick(tracker)}
@@ -45,7 +48,7 @@ const TrackerDetails = ({
       </TrackerListContainer>
 
       {groupTitle && (
-        <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
+        <HeaderContainer color={getTrackerColor(groupTitle, sortedTrackers)}>
           <div className="header-row">
             <h1>{groupTitle}</h1>
             <DateFilterDescription description={selectedFilter} />

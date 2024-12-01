@@ -7,20 +7,24 @@ const AccountMenu = ({
   onAuthClick,
   onSignoutClick,
   calendarId,
-  calendarList,
+  calendarList = [], // Default to empty array
   onCalendarChange,
 }) => (
   <StyledAccountMenu>
     {isAuthorized ? (
       <>
         <StyledButton onClick={onAuthClick}>Connect Calendar</StyledButton>
-        <StyledSelect value={calendarId} onChange={(e) => onCalendarChange(e.target.value)}>
-          {calendarList.map((calendar) => (
-            <option key={calendar.id} value={calendar.id}>
-              {calendar.summary}
-            </option>
-          ))}
-        </StyledSelect>
+        {calendarList.length > 0 ? (
+          <StyledSelect value={calendarId} onChange={(e) => onCalendarChange(e.target.value)}>
+            {calendarList.map((calendar) => (
+              <option key={calendar.id} value={calendar.id}>
+                {calendar.summary}
+              </option>
+            ))}
+          </StyledSelect>
+        ) : (
+          <p>No calendars available</p>
+        )}
         <StyledButton onClick={onSignoutClick}>Sign Out</StyledButton>
       </>
     ) : (
@@ -39,7 +43,7 @@ AccountMenu.propTypes = {
       id: PropTypes.string.isRequired,
       summary: PropTypes.string.isRequired,
     })
-  ).isRequired,
+  ),
   onCalendarChange: PropTypes.func.isRequired,
 };
 

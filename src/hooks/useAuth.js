@@ -12,7 +12,6 @@ export const useAuth = () => {
 
   useEffect(() => {
     initializeGisClient(CLIENT_ID, SCOPES, (token) => {
-      console.log("Authorized with token:", token);
       setAccessToken(token);
       setIsAuthorized(true);
     });

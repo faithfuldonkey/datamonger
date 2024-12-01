@@ -1,18 +1,28 @@
-import { useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { listUpcomingEvents } from "../services/api";
 
-export const useEvents = (calendarId, startDate, endDate, eventCount) => {
-  const [events, setEvents] = useState([]);
-  const [uniqueTitles, setUniqueTitles] = useState([]);
+// Create Events Context
+const EventsContext = createContext();
+
+export const EventsProvider = ({ children }) => {
+  const [allEvents, setAllEvents] = useState([]); // Store all events globally
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const items = await listUpcomingEvents(calendarId, startDate, endDate, eventCount);
-      setEvents(items);
-      setUniqueTitles([...new Set(items.map((event) => event.summary))]);
+    const fetchAllEvents = async () => {
+      const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // Last year
+      const endDate = new Date(); // Today
+      const events = await listUpcomingEvents("primary", startDate, endDate, 1000);
+      setAllEvents(events);
     };
-    fetchEvents();
-  }, [calendarId, startDate, endDate, eventCount]);
 
-  return { events, uniqueTitles, setEvents };
+    fetchAllEvents();
+  }, []);
+
+  return (
+    <EventsContext.Provider value={{ allEvents, setAllEvents }}>
+      {children}
+    </EventsContext.Provider>
+  );
 };
+
+export const useEvents = () => useContext(EventsContext);

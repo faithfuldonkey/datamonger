@@ -34,26 +34,26 @@ const CustomDatePicker = ({ startDate, endDate, onDateChange, onPresetSelect }) 
   ];
 
   useEffect(() => {
-    // Ensure the default preset is only set on the first mount
+    
     if (onPresetSelect) {
-      const defaultPreset = presets[1]; // "Last 30 Days"
+      const defaultPreset = presets[1]; 
       onPresetSelect(defaultPreset.label);
     }
-  }, []); // Empty dependency array ensures this runs only once
+  }, []); 
 
   const handlePresetSelect = ([presetStartDate, presetEndDate], label) => {
     onDateChange(presetStartDate, presetEndDate);
-    onPresetSelect(label); // Pass selected label back to parent
+    onPresetSelect(label); 
   };
 
   const handleStartDateChange = (date) => {
     onDateChange(date, endDate);
-    onPresetSelect("Custom"); // Set to "Custom" for manual changes
+    onPresetSelect("Custom"); 
   };
 
   const handleEndDateChange = (date) => {
     onDateChange(startDate, date);
-    onPresetSelect("Custom"); // Set to "Custom" for manual changes
+    onPresetSelect("Custom"); 
   };
 
   return (
