@@ -11,6 +11,7 @@ import { groupEventsBySummary } from "./utils/groupEvents";
 import GlobalStyle from "./styles/GlobalStyles";
 import { useEvents } from "./contexts/EventsContext"; // Import useEvents
 import { formatDate } from "./utils/formatters"; // Ensure formatDate is imported
+import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner"; // New Component
 
 const App = () => {
   const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } =
@@ -27,6 +28,7 @@ const App = () => {
   );
   const [endDate, setEndDate] = useState(new Date());
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
+  const [loading, setLoading] = useState(true); // New loading state
 
   const handleTrackerClick = (tracker) => {
     setSelectedGroup(tracker);
@@ -56,19 +58,6 @@ const App = () => {
     }
   }, [isAuthorized, accessToken]);
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem("accessToken");
-    if ((calendarId && isAuthorized) || savedToken) {
-      const timeMin = new Date("1970-01-01").toISOString();
-      const timeMax = new Date("2100-01-01").toISOString();
-      listEvents(savedToken || accessToken, calendarId, timeMin, timeMax).then(
-        (fetchedEvents) => {
-          setEvents(fetchedEvents); // Store fetched events globally
-        }
-      );
-    }
-  }, [calendarId, accessToken, isAuthorized]); // Removed startDate and endDate
-
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
       const eventDate = new Date(event.start.dateTime || event.start.date);
@@ -83,6 +72,29 @@ const App = () => {
   const handleCalendarChange = (newCalendarId) => {
     setCalendarId(newCalendarId);
   };
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem("accessToken");
+    if ((calendarId && isAuthorized) || savedToken) {
+      setLoading(true); // Start loading
+      const timeMin = new Date("1970-01-01").toISOString();
+      const timeMax = new Date("2100-01-01").toISOString();
+      listEvents(savedToken || accessToken, calendarId, timeMin, timeMax).then(
+        (fetchedEvents) => {
+          setEvents(fetchedEvents);
+          setLoading(false); // Stop loading after events load
+        }
+      );
+    }
+  }, [calendarId, accessToken, isAuthorized]);
+
+  if (loading) {
+    return (
+      <StyledApp>
+        <LoadingSpinner />
+      </StyledApp>
+    );
+  }
 
   if (!isAuthorized) {
     return (

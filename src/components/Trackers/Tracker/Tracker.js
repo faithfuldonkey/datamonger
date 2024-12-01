@@ -6,8 +6,8 @@ const Tracker = ({ title, color, isSelected, isInDetailsView, onClick }) => (
     onClick={onClick}
     color={color}
     isSelected={isSelected}
-    isInDetailsView={undefined} // Remove it from DOM attributes
-  >
+    isInDetailsView={isInDetailsView}
+    >
     <TrackerText>{title}</TrackerText>
   </StyledTracker>
 );

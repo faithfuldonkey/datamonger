@@ -34,12 +34,12 @@ const CustomDatePicker = ({ startDate, endDate, onDateChange, onPresetSelect }) 
   ];
 
   useEffect(() => {
-    
     if (onPresetSelect) {
-      const defaultPreset = presets[1]; 
+      const defaultPreset = presets[2];
+      onDateChange(defaultPreset.value[0], defaultPreset.value[1]);
       onPresetSelect(defaultPreset.label);
     }
-  }, []); 
+  }, []);
 
   const handlePresetSelect = ([presetStartDate, presetEndDate], label) => {
     onDateChange(presetStartDate, presetEndDate);
