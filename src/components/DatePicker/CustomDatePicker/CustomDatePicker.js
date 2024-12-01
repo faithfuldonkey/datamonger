@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DatePicker from "react-datepicker";
 import {
   StyledDatePickerContainer,
@@ -8,41 +8,52 @@ import {
 } from "./CustomDatePicker.styles";
 import "react-datepicker/dist/react-datepicker.css";
 
-const CustomDatePicker = ({ startDate, endDate, onDateChange }) => {
+const CustomDatePicker = ({ startDate, endDate, onDateChange, onPresetSelect }) => {
   const presets = [
     {
       label: "Last 7 Days",
       value: [
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-        new Date(), // Today
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        new Date(),
       ],
     },
     {
       label: "Last 30 Days",
       value: [
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        new Date(), // Today
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        new Date(),
       ],
     },
     {
       label: "Last 365 Days",
       value: [
-        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), // 365 days ago
-        new Date(), // Today
+        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+        new Date(),
       ],
     },
   ];
 
-  const handlePresetSelect = ([presetStartDate, presetEndDate]) => {
+  useEffect(() => {
+    // Ensure the default preset is only set on the first mount
+    if (onPresetSelect) {
+      const defaultPreset = presets[1]; // "Last 30 Days"
+      onPresetSelect(defaultPreset.label);
+    }
+  }, []); // Empty dependency array ensures this runs only once
+
+  const handlePresetSelect = ([presetStartDate, presetEndDate], label) => {
     onDateChange(presetStartDate, presetEndDate);
+    onPresetSelect(label); // Pass selected label back to parent
   };
 
   const handleStartDateChange = (date) => {
     onDateChange(date, endDate);
+    onPresetSelect("Custom"); // Set to "Custom" for manual changes
   };
 
   const handleEndDateChange = (date) => {
     onDateChange(startDate, date);
+    onPresetSelect("Custom"); // Set to "Custom" for manual changes
   };
 
   return (
@@ -64,7 +75,7 @@ const CustomDatePicker = ({ startDate, endDate, onDateChange }) => {
         {presets.map((preset) => (
           <DatePresetButton
             key={preset.label}
-            onClick={() => handlePresetSelect(preset.value)}
+            onClick={() => handlePresetSelect(preset.value, preset.label)}
           >
             {preset.label}
           </DatePresetButton>

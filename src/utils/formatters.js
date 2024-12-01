@@ -26,8 +26,7 @@ export const formatToMMDDYYYY = (dateObj) => {
   
     if (diffInDays === 0) return "Today";
     if (diffInDays === 1) return "Yesterday";
-    if (diffInDays > 1 && diffInDays <= 5) return `${diffInDays} days ago`;
-  
+      
     return eventDate.toLocaleDateString("en-EN", {
       day: "numeric",
       month: "long",
@@ -44,12 +43,19 @@ export const formatToMMDDYYYY = (dateObj) => {
     const months = Math.floor(days / 30); // Approximation: 30 days in a month
     const years = Math.floor(days / 365); // Approximation: 365 days in a year
   
-    if (seconds < 60) return `${seconds} seconds`;
-    if (minutes < 60) return `${minutes} minutes`;
-    if (hours < 24) return `${hours} hours`;
-    if (days < 7) return `${days} days`;
-    if (weeks < 4) return `${weeks} weeks`;
-    if (months < 12) return `${months} months`;
-    return `${years} years`;
+    // Helper function to return singular or plural
+    const formatUnit = (value, unit) => `${value} ${unit}${value === 1 ? "" : "s"}`;
+  
+    if (seconds < 60) return formatUnit(seconds, "second");
+    if (minutes < 60) return formatUnit(minutes, "minute");
+    
+    // Display hours if less than 48 hours
+    if (hours < 48) return formatUnit(hours, "hour");
+  
+    if (days < 7) return formatUnit(days, "day");
+    if (weeks < 4) return formatUnit(weeks, "week");
+    if (months < 12) return formatUnit(months, "month");
+    return formatUnit(years, "year");
   };
+  
   

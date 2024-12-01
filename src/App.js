@@ -3,16 +3,8 @@ import { useAuth } from "./hooks/useAuth";
 import { loadCalendarList, listEvents } from "./services/authService";
 import { StyledApp, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
-import TrackerList from "./components/Trackers/TrackerList/TrackerList";
-import CustomDatePicker from "./components/DatePicker/CustomDatePicker/CustomDatePicker";
 import DateFilterDescription from "./components/Common/DateFilterDescription/DateFilterDescription";
-import StatisticsContainer from "./components/Statistics/StatisticsContainer/StatisticsContainer";
 import Button from "./components/Common/Button/Button";
-import ChartWrapper from "./components/Charts/ChartWrapper/ChartWrapper";
-import Table from "./components/Common/Table/Table";
-import AccountMenu from "./components/Auth/AccountMenu/AccountMenu";
-import CalendarSelector from "./components/Calendar/CalendarSelector";
-import { formatToMMDDYYYY, sortEvents, formatDate } from "./utils/formatters";
 import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails";
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
@@ -97,8 +89,6 @@ const App = () => {
     setEvents([]);
     setCalendarId("");
   };
-
-  const sortedEvents = sortEvents(events, sortNewestFirst);
 
   if (!isAuthorized && !localStorage.getItem("accessToken")) {
     return (

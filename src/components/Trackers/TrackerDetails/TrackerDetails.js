@@ -6,6 +6,7 @@ import Table from "../../Common/Table/Table";
 import CustomDatePicker from "../../DatePicker/CustomDatePicker/CustomDatePicker";
 import Tracker from "../Tracker/Tracker";
 import { getTrackerColor } from "../../../utils/constants";
+import DateFilterDescription from "../../Common/DateFilterDescription/DateFilterDescription";
 import { formatDate } from "../../../utils/formatters";
 import {
   TrackerDetailsContainer,
@@ -13,20 +14,21 @@ import {
   TrackerListContainer,
   StatisticsContainer,
   EventsTableContainer,
-  StyledIcon, // Import StyledIcon
+  StyledIcon, 
 } from "./TrackerDetails.styles";
 
 const TrackerDetails = ({
   groupTitle,
   events,
-  trackers = [], // Default value for trackers
+  trackers = [],
   onTrackerClick,
   startDate,
   endDate,
-  onDateChange, // New props for date range management
+  onDateChange,
 }) => {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-
+  const [selectedFilter, setSelectedFilter] = useState("Last 30 Days"); // Default to "Last 30 Days"
+  
   return (
     <TrackerDetailsContainer>
       <TrackerListContainer>
@@ -36,7 +38,7 @@ const TrackerDetails = ({
             title={tracker}
             color={getTrackerColor(tracker, trackers)}
             isSelected={tracker === groupTitle}
-            isInDetailsView={!!groupTitle} // Dynamically pass whether details view is active
+            isInDetailsView={!!groupTitle}
             onClick={() => onTrackerClick(tracker)}
           />
         ))}
@@ -46,6 +48,7 @@ const TrackerDetails = ({
         <HeaderContainer color={getTrackerColor(groupTitle, trackers)}>
           <div className="header-row">
             <h1>{groupTitle}</h1>
+            <DateFilterDescription description={selectedFilter} />
             <StyledIcon
               className="material-icons"
               onClick={() => setIsDatePickerVisible(!isDatePickerVisible)}
@@ -58,6 +61,10 @@ const TrackerDetails = ({
               startDate={startDate}
               endDate={endDate}
               onDateChange={onDateChange}
+              onPresetSelect={(label) => {
+                console.log("Preset selected:", label);
+                setSelectedFilter(label);
+              }}
             />
           )}
           <div className="separator" />
