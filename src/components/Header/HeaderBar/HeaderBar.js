@@ -8,7 +8,7 @@ const HeaderBar = ({
   isAccountMenuVisible,
   isAuthorized,
   onAuthClick,
-  handleSignoutClick,
+  onSignoutClick,
   calendarId,
   calendarList,
   onCalendarChange,
@@ -37,7 +37,7 @@ const HeaderBar = ({
         <AccountMenu
         isAuthorized={isAuthorized}
         onAuthClick={onAuthClick}
-        onSignoutClick={handleSignoutClick} // Rename to match AccountMenu's prop name
+        onSignoutClick={onSignoutClick} // Rename to match AccountMenu's prop name
         calendarId={calendarId}
         calendarList={calendarList}
         onCalendarChange={onCalendarChange}
