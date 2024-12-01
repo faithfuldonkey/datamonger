@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { loadCalendarList, listEvents } from "./services/authService";
 import { StyledApp, MainPage } from "./StyledComponents";
@@ -9,33 +9,23 @@ import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails"
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
 import GlobalStyle from "./styles/GlobalStyles";
-import { AuthProvider } from './contexts/AuthContext';
-
-
+import { useEvents } from "./contexts/EventsContext"; // Import useEvents
+import { formatDate } from "./utils/formatters"; // Ensure formatDate is imported
 
 const App = () => {
-  const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } =
-    useAuth();
-  const [calendarId, setCalendarId] = useState(
-    localStorage.getItem("calendarId") || ""
-  );
+  const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } = useAuth();
+  const { events, setEvents } = useEvents(); // Access events and setEvents from context
+  const [calendarId, setCalendarId] = useState(localStorage.getItem("calendarId") || "");
   const [calendars, setCalendars] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [groupedEvents, setGroupedEvents] = useState({});
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [startDate, setStartDate] = useState(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-  );
+  const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const [endDate, setEndDate] = useState(new Date());
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
-  const [sortNewestFirst, setSortNewestFirst] = useState(true);
 
-  
   const handleTrackerClick = (tracker) => {
     setSelectedGroup(tracker); 
   };
 
-  
   useEffect(() => {
     if (accessToken) {
       localStorage.setItem("accessToken", accessToken);
@@ -48,7 +38,6 @@ const App = () => {
     }
   }, [calendarId]);
 
-  
   useEffect(() => {
     const savedToken = localStorage.getItem("accessToken");
     if (isAuthorized || savedToken) {
@@ -61,21 +50,32 @@ const App = () => {
     }
   }, [isAuthorized, accessToken]);
 
-  
   useEffect(() => {
     const savedToken = localStorage.getItem("accessToken");
     if ((calendarId && isAuthorized) || savedToken) {
+      const timeMin = new Date("1970-01-01").toISOString();
+      const timeMax = new Date("2100-01-01").toISOString();
       listEvents(
         savedToken || accessToken,
         calendarId,
-        startDate.toISOString(),
-        endDate.toISOString()
-      ).then((events) => {
-        setEvents(events);
-        setGroupedEvents(groupEventsBySummary(events));
+        timeMin,
+        timeMax
+      ).then((fetchedEvents) => {
+        setEvents(fetchedEvents); // Store fetched events globally
       });
     }
-  }, [calendarId, accessToken, startDate, endDate]);
+  }, [calendarId, accessToken, isAuthorized]); // Removed startDate and endDate
+
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const eventDate = new Date(event.start.dateTime || event.start.date);
+      return eventDate >= startDate && eventDate <= endDate;
+    });
+  }, [events, startDate, endDate]);
+
+  const groupedEvents = useMemo(() => {
+    return groupEventsBySummary(filteredEvents);
+  }, [filteredEvents]);
 
   const handleCalendarChange = (newCalendarId) => {
     setCalendarId(newCalendarId);
@@ -102,8 +102,7 @@ const App = () => {
 
   return (
     <>
-      <GlobalStyle /> {/* Global styles applied here */}
-      <AuthProvider>
+      <GlobalStyle />
       <StyledApp>
         <MainPage>
           <HeaderBar
@@ -119,7 +118,6 @@ const App = () => {
             calendarList={calendars}
             onCalendarChange={handleCalendarChange}
           />
-          <DateFilterDescription startDate={startDate} endDate={endDate} />
           {selectedGroup ? (
             <TrackerDetails
               groupTitle={selectedGroup}
@@ -142,7 +140,6 @@ const App = () => {
           )}
         </MainPage>
       </StyledApp>
-      </AuthProvider>
     </>
   );
 };
