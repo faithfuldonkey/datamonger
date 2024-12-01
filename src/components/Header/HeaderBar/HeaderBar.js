@@ -8,7 +8,7 @@ const HeaderBar = ({
   isAccountMenuVisible,
   isAuthorized,
   onAuthClick,
-  onSignoutClick,
+  handleSignoutClick,
   calendarId,
   calendarList,
   onCalendarChange,
@@ -35,13 +35,13 @@ const HeaderBar = ({
       {/* Conditional rendering for the AccountMenu */}
       {isAccountMenuVisible && (
         <AccountMenu
-          isAuthorized={isAuthorized}
-          onAuthClick={onAuthClick}
-          onSignoutClick={onSignoutClick}
-          calendarId={calendarId}
-          calendarList={calendarList}
-          onCalendarChange={onCalendarChange}
-        />
+        isAuthorized={isAuthorized}
+        onAuthClick={onAuthClick}
+        onSignoutClick={handleSignoutClick} // Rename to match AccountMenu's prop name
+        calendarId={calendarId}
+        calendarList={calendarList}
+        onCalendarChange={onCalendarChange}
+      />
       )}
     </div>
   </StyledHeaderBar>

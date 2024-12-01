@@ -13,17 +13,23 @@ import { useEvents } from "./contexts/EventsContext"; // Import useEvents
 import { formatDate } from "./utils/formatters"; // Ensure formatDate is imported
 
 const App = () => {
-  const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } = useAuth();
+  const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } =
+    useAuth();
   const { events, setEvents } = useEvents(); // Access events and setEvents from context
-  const [calendarId, setCalendarId] = useState(localStorage.getItem("calendarId") || "");
+  console.log("handleSignoutClick from useAuth:", handleSignoutClick);
+  const [calendarId, setCalendarId] = useState(
+    localStorage.getItem("calendarId") || ""
+  );
   const [calendars, setCalendars] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+  const [startDate, setStartDate] = useState(
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+  );
   const [endDate, setEndDate] = useState(new Date());
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
 
   const handleTrackerClick = (tracker) => {
-    setSelectedGroup(tracker); 
+    setSelectedGroup(tracker);
   };
 
   useEffect(() => {
@@ -44,7 +50,7 @@ const App = () => {
       loadCalendarList(savedToken || accessToken).then((calendarList) => {
         setCalendars(calendarList);
         if (!calendarId && calendarList.length > 0) {
-          setCalendarId(calendarList[0].id); 
+          setCalendarId(calendarList[0].id);
         }
       });
     }
@@ -55,19 +61,16 @@ const App = () => {
     if ((calendarId && isAuthorized) || savedToken) {
       const timeMin = new Date("1970-01-01").toISOString();
       const timeMax = new Date("2100-01-01").toISOString();
-      listEvents(
-        savedToken || accessToken,
-        calendarId,
-        timeMin,
-        timeMax
-      ).then((fetchedEvents) => {
-        setEvents(fetchedEvents); // Store fetched events globally
-      });
+      listEvents(savedToken || accessToken, calendarId, timeMin, timeMax).then(
+        (fetchedEvents) => {
+          setEvents(fetchedEvents); // Store fetched events globally
+        }
+      );
     }
   }, [calendarId, accessToken, isAuthorized]); // Removed startDate and endDate
 
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDate = new Date(event.start.dateTime || event.start.date);
       return eventDate >= startDate && eventDate <= endDate;
     });
@@ -81,16 +84,7 @@ const App = () => {
     setCalendarId(newCalendarId);
   };
 
-  const handleSignOut = () => {
-    handleSignoutClick();
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("calendarId");
-    setCalendars([]);
-    setEvents([]);
-    setCalendarId("");
-  };
-
-  if (!isAuthorized && !localStorage.getItem("accessToken")) {
+  if (!isAuthorized) {
     return (
       <StyledApp>
         <MainPage>
@@ -113,24 +107,26 @@ const App = () => {
             isAccountMenuVisible={isAccountMenuVisible}
             isAuthorized={isAuthorized}
             onAuthClick={handleAuthClick}
-            onSignoutClick={handleSignOut}
+            onSignoutClick={handleSignoutClick}
             calendarId={calendarId}
             calendarList={calendars}
             onCalendarChange={handleCalendarChange}
           />
+
           {selectedGroup ? (
             <TrackerDetails
               groupTitle={selectedGroup}
-              events={groupedEvents[selectedGroup] || []} 
-              trackers={Object.keys(groupedEvents)} 
+              events={groupedEvents[selectedGroup] || []}
+              trackers={Object.keys(groupedEvents)}
+              allTrackers={Object.keys(groupEventsBySummary(events))}
               onBackClick={() => setSelectedGroup(null)}
-              onTrackerClick={handleTrackerClick} 
-              startDate={startDate} 
-              endDate={endDate} 
+              onTrackerClick={handleTrackerClick}
+              startDate={startDate}
+              endDate={endDate}
               onDateChange={(newStartDate, newEndDate) => {
                 setStartDate(newStartDate);
                 setEndDate(newEndDate);
-              }} 
+              }}
             />
           ) : (
             <GroupedEvents

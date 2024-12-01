@@ -21,9 +21,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleSignoutClick = () => {
+    console.log("Signing out...");
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("calendarId");
     setIsAuthorized(false);
+  
+    // Confirm that state updates asynchronously
+    setTimeout(() => {
+      console.log("isAuthorized (after state update):", isAuthorized); // Should be false
+    }, 0);
   };
+  
+  
 
   return (
     <AuthContext.Provider

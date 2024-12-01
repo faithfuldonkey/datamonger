@@ -21,6 +21,7 @@ const TrackerDetails = ({
   groupTitle,
   events,
   trackers = [],
+  allTrackers = [], // Add this prop for all detected trackers
   onTrackerClick,
   startDate,
   endDate,
@@ -29,17 +30,18 @@ const TrackerDetails = ({
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Last 30 Days"); // Default to "Last 30 Days"
 
-  // Sort trackers alphabetically (or by any consistent criteria)
-  const sortedTrackers = trackers.slice().sort();
+  // Ensure the full list of trackers is sorted consistently
+  const sortedAllTrackers = allTrackers.slice().sort();
 
   return (
     <TrackerDetailsContainer>
+      {/* Always render all trackers */}
       <TrackerListContainer>
-        {sortedTrackers.map((tracker) => (
+        {sortedAllTrackers.map((tracker) => (
           <Tracker
             key={tracker}
             title={tracker}
-            color={getTrackerColor(tracker, sortedTrackers)} // Use sorted trackers
+            color={getTrackerColor(tracker, sortedAllTrackers)} // Use sorted full list of trackers
             isSelected={tracker === groupTitle}
             isInDetailsView={!!groupTitle}
             onClick={() => onTrackerClick(tracker)}
@@ -48,7 +50,7 @@ const TrackerDetails = ({
       </TrackerListContainer>
 
       {groupTitle && (
-        <HeaderContainer color={getTrackerColor(groupTitle, sortedTrackers)}>
+        <HeaderContainer color={getTrackerColor(groupTitle, sortedAllTrackers)}>
           <div className="header-row">
             <h1>{groupTitle}</h1>
             <DateFilterDescription description={selectedFilter} />
@@ -64,10 +66,7 @@ const TrackerDetails = ({
               startDate={startDate}
               endDate={endDate}
               onDateChange={onDateChange}
-              onPresetSelect={(label) => {
-                console.log("Preset selected:", label);
-                setSelectedFilter(label);
-              }}
+              onPresetSelect={(label) => setSelectedFilter(label)}
             />
           )}
           <div className="separator" />
@@ -92,11 +91,7 @@ const TrackerDetails = ({
             ]}
             rows={events
               .slice()
-              .sort((a, b) => {
-                const dateA = new Date(a.start.dateTime || a.start.date);
-                const dateB = new Date(b.start.dateTime || b.start.date);
-                return dateB - dateA;
-              })
+              .sort((a, b) => new Date(b.start.dateTime || b.start.date) - new Date(a.start.dateTime || a.start.date))
               .map((event) => {
                 const date = new Date(event.start.dateTime || event.start.date);
                 return [

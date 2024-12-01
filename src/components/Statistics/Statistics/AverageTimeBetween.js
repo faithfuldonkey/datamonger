@@ -4,7 +4,9 @@ import { formatTimeDifference } from "../../../utils/formatters";
 
 const AverageTimeBetween = ({ events }) => {
   const calculateAverageTime = () => {
-    if (events.length < 2) return "N/A";
+    if (events.length < 2) {
+      return "N/A"; // Handle case where there are fewer than 2 events
+    }
 
     let totalDifference = 0;
     for (let i = 0; i < events.length - 1; i++) {

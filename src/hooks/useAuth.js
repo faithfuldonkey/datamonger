@@ -21,5 +21,14 @@ export const useAuth = () => {
     requestAccessToken();
   };
 
-  return { isAuthorized, accessToken, handleAuthClick };
+  const handleSignoutClick = () => {
+    console.log("Signing out...");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("calendarId");
+    setAccessToken(null);
+    setIsAuthorized(false);
+    console.log("Signed out successfully.");
+  };
+
+  return { isAuthorized, accessToken, handleAuthClick, handleSignoutClick }; // Include handleSignoutClick
 };
