@@ -3,14 +3,12 @@ import { useAuth } from "./hooks/useAuth";
 import { loadCalendarList, listEvents } from "./services/authService";
 import { StyledApp, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
-import DateFilterDescription from "./components/Common/DateFilterDescription/DateFilterDescription";
 import Button from "./components/Common/Button/Button";
 import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails";
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
 import GlobalStyle from "./styles/GlobalStyles";
 import { useEvents } from "./contexts/EventsContext"; // Import useEvents
-import { formatDate } from "./utils/formatters"; // Ensure formatDate is imported
 import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner"; // New Component
 
 const App = () => {

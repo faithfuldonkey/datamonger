@@ -5,6 +5,7 @@ import AverageTimeBetween from "../../Statistics/Statistics/AverageTimeBetween.j
 import Table from "../../Common/Table/Table";
 import CustomDatePicker from "../../DatePicker/CustomDatePicker/CustomDatePicker";
 import Tracker from "../Tracker/Tracker";
+import GenericButton from "../../Common/Button/GenericButton";
 import { getTrackerColor } from "../../../utils/constants";
 import DateFilterDescription from "../../Common/DateFilterDescription/DateFilterDescription";
 import { formatDate } from "../../../utils/formatters";
@@ -29,19 +30,31 @@ const TrackerDetails = ({
 }) => {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Time");
+  const [showAllEvents, setShowAllEvents] = useState(false); 
 
-  // Ensure the full list of trackers is sorted consistently
+  
   const sortedAllTrackers = allTrackers.slice().sort();
+
+  const sortedEvents = events
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.start.dateTime || b.start.date) -
+        new Date(a.start.dateTime || a.start.date)
+    );
+
+  const displayedEvents = showAllEvents
+    ? sortedEvents
+    : sortedEvents.slice(0, 15);
 
   return (
     <TrackerDetailsContainer>
-      {/* Always render all trackers */}
       <TrackerListContainer>
         {sortedAllTrackers.map((tracker) => (
           <Tracker
             key={tracker}
             title={tracker}
-            color={getTrackerColor(tracker, sortedAllTrackers)} // Use sorted full list of trackers
+            color={getTrackerColor(tracker, sortedAllTrackers)} 
             isSelected={tracker === groupTitle}
             isInDetailsView={!!groupTitle}
             onClick={() => onTrackerClick(tracker)}
@@ -89,24 +102,27 @@ const TrackerDetails = ({
               { label: "Date", align: "left" },
               { label: "Time", align: "right" },
             ]}
-            rows={events
-              .slice()
-              .sort((a, b) => new Date(b.start.dateTime || b.start.date) - new Date(a.start.dateTime || a.start.date))
-              .map((event) => {
-                const date = new Date(event.start.dateTime || event.start.date);
-                return [
-                  { content: formatDate(date), align: "left" },
-                  {
-                    content: date.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    }),
-                    align: "right",
-                  },
-                ];
-              })}
+            rows={displayedEvents.map((event) => {
+              const date = new Date(event.start.dateTime || event.start.date);
+              return [
+                { content: formatDate(date), align: "left" },
+                {
+                  content: date.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  }),
+                  align: "right",
+                },
+              ];
+            })}
           />
+          {!showAllEvents && sortedEvents.length > 15 && (
+            <GenericButton
+              label="Show All Events"
+              onClick={() => setShowAllEvents(true)}
+            />
+          )}
         </EventsTableContainer>
       )}
     </TrackerDetailsContainer>
