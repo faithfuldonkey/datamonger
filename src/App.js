@@ -8,13 +8,13 @@ import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails"
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
 import GlobalStyle from "./styles/GlobalStyles";
-import { useEvents } from "./contexts/EventsContext"; // Import useEvents
-import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner"; // New Component
+import { useEvents } from "./contexts/EventsContext"; 
+import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner"; 
 
 const App = () => {
   const { isAuthorized, accessToken, handleAuthClick, handleSignoutClick } =
     useAuth();
-  const { events, setEvents } = useEvents(); // Access events and setEvents from context
+  const { events, setEvents } = useEvents(); 
   console.log("handleSignoutClick from useAuth:", handleSignoutClick);
   const [calendarId, setCalendarId] = useState(
     localStorage.getItem("calendarId") || ""
@@ -26,7 +26,7 @@ const App = () => {
   );
   const [endDate, setEndDate] = useState(new Date());
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(true); 
 
   const handleTrackerClick = (tracker) => {
     setSelectedGroup(tracker);
@@ -74,25 +74,25 @@ const App = () => {
   useEffect(() => {
     const savedToken = localStorage.getItem("accessToken");
     if ((calendarId && isAuthorized) || savedToken) {
-      setLoading(true); // Start loading
+      setLoading(true); 
       const timeMin = new Date("1970-01-01").toISOString();
       const timeMax = new Date("2100-01-01").toISOString();
       listEvents(savedToken || accessToken, calendarId, timeMin, timeMax).then(
         (fetchedEvents) => {
           setEvents(fetchedEvents);
-          setLoading(false); // Stop loading after events load
+          setLoading(false); 
         }
       );
     }
   }, [calendarId, accessToken, isAuthorized]);
 
-  if (loading) {
-    return (
-      <StyledApp>
-        <LoadingSpinner />
-      </StyledApp>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <StyledApp>
+  //       <LoadingSpinner />
+  //     </StyledApp>
+  //   );
+  // }
 
   if (!isAuthorized) {
     return (
