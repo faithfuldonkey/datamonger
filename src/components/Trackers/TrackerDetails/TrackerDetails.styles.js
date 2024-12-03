@@ -13,29 +13,29 @@ export const TrackerDetailsContainer = styled.div`
 
 export const HeaderContainer = styled.div`
   display: flex;
-  flex-direction: column; /* Keep the separator below the header row */
+  flex-direction: column;
   width: 100%;
 
   .header-row {
     display: flex;
-    flex-direction: row; /* Align header and icon horizontally */
-    justify-content: space-between; /* Space between the text and icon */
-    align-items: center; /* Center vertically */
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
   }
 
   h1 {
     margin: 0;
     font-size: 2rem;
-    text-align: left; /* Ensure text stays left-aligned */
-    flex-grow: 1; /* Push the icon to the far right */
+    text-align: left;
+    flex-grow: 1;
   }
 
   .separator {
     width: 100%;
     height: 5px;
     margin-top: 8px;
-    background-color: ${({ color }) => color || "#ccc"}; /* Fallback color */
+    background-color: ${({ color }) => color || "#ccc"};
   }
 `;
 
@@ -48,11 +48,11 @@ export const TrackerListContainer = styled.div`
   gap: 12px;
   overflow-x: auto;
 
-  /* Hide scrollbars visually */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+ 
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
+    display: none;
   }
 `;
 
@@ -73,6 +73,14 @@ export const StyledIcon = styled.span`
   cursor: pointer;
   font-size: 1.5rem;
   color: #111;
-  align-self: center; /* Align vertically in the header */
-  margin-left: auto; /* Push the icon to the far right */
+  align-self: center;
+  margin-left: auto;
+`;
+
+export const DeltaTimeIndicator = styled.div`
+  font-size: 0.75rem;
+  color: #4caf50;
+  font-style: italic;
+  margin-top: 4px;
+  font-weight: 500;
 `;

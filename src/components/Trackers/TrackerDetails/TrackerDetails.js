@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import TimeSinceLast from "../../Statistics/Statistics/TimeSinceLast.js";
 import TotalCount from "../../Statistics/Statistics/TotalCount.js";
 import AverageTimeBetween from "../../Statistics/Statistics/AverageTimeBetween.js";
+import LongestDailyStreak from "../../Statistics/Statistics/LongestDailyStreak";
+import MostIn24Hours from "../../Statistics/Statistics/MostIn24Hours";
 import Table from "../../Common/Table/Table";
 import CustomDatePicker from "../../DatePicker/CustomDatePicker/CustomDatePicker";
 import Tracker from "../Tracker/Tracker";
+import { DeltaTimeIndicator } from "./TrackerDetails.styles";
 import GenericButton from "../../Common/Button/GenericButton";
 import { getTrackerColor } from "../../../utils/constants";
 import DateFilterDescription from "../../Common/DateFilterDescription/DateFilterDescription";
 import { formatDate } from "../../../utils/formatters";
+import { formatTimeDifference } from "../../../utils/formatters";
 import {
   TrackerDetailsContainer,
   HeaderContainer,
@@ -30,9 +34,8 @@ const TrackerDetails = ({
 }) => {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Time");
-  const [showAllEvents, setShowAllEvents] = useState(false); 
+  const [showAllEvents, setShowAllEvents] = useState(false);
 
-  
   const sortedAllTrackers = allTrackers.slice().sort();
 
   const sortedEvents = events
@@ -47,6 +50,22 @@ const TrackerDetails = ({
     ? sortedEvents
     : sortedEvents.slice(0, 15);
 
+  const displayedEventsWithDelta = displayedEvents.map((event, index) => {
+    const date = new Date(event.start.dateTime || event.start.date);
+    const previousEvent = displayedEvents[index + 1];
+    const deltaTime = previousEvent
+      ? formatTimeDifference(
+          date -
+            new Date(previousEvent.start.dateTime || previousEvent.start.date)
+        )
+      : null;
+
+    return {
+      date,
+      deltaTime,
+    };
+  });
+
   return (
     <TrackerDetailsContainer>
       <TrackerListContainer>
@@ -54,7 +73,7 @@ const TrackerDetails = ({
           <Tracker
             key={tracker}
             title={tracker}
-            color={getTrackerColor(tracker, sortedAllTrackers)} 
+            color={getTrackerColor(tracker, sortedAllTrackers)}
             isSelected={tracker === groupTitle}
             isInDetailsView={!!groupTitle}
             onClick={() => onTrackerClick(tracker)}
@@ -91,6 +110,8 @@ const TrackerDetails = ({
           <TimeSinceLast events={events} />
           <TotalCount events={events} />
           <AverageTimeBetween events={events} />
+          <LongestDailyStreak events={events} />
+          <MostIn24Hours events={events} />
         </StatisticsContainer>
       )}
 
@@ -102,17 +123,26 @@ const TrackerDetails = ({
               { label: "Date", align: "left" },
               { label: "Time", align: "right" },
             ]}
-            rows={displayedEvents.map((event) => {
-              const date = new Date(event.start.dateTime || event.start.date);
+            rows={displayedEventsWithDelta.map(({ date, deltaTime }) => {
               return [
-                { content: formatDate(date), align: "left" },
                 {
-                  content: date.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  }),
-                  align: "right",
+                  content: formatDate(date), // Date remains the same
+                  align: "left",
+                },
+                {
+                  content: (
+                    <>
+                      {date.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      {deltaTime && (
+                        <DeltaTimeIndicator>+{deltaTime}</DeltaTimeIndicator>
+                      )}
+                    </>
+                  ),
+                  align: "right", // Time now contains delta indicator underneath
                 },
               ];
             })}

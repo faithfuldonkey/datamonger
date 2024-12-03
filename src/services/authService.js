@@ -132,3 +132,42 @@ export const listEvents = async (accessToken, calendarId, timeMin, timeMax) => {
     return [];
   }
 };
+
+export const fetchAllEvents = async (accessToken, calendarId, timeMin, timeMax) => {
+  try {
+      let events = [];
+      let nextPageToken = null;
+      let apiCallCount = 0; // Initialize a counter for API calls
+
+      do {
+          apiCallCount++; // Increment the counter for each API call
+          console.log(`API Call #${apiCallCount}: Fetching events...`);
+
+          const response = await fetch(
+              `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=2500${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`,
+              {
+                  headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                  },
+              }
+          );
+
+          if (!response.ok) {
+              throw new Error(`Failed to fetch events: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          events = [...events, ...data.items];
+          nextPageToken = data.nextPageToken;
+
+          console.log(`API Call #${apiCallCount}: Retrieved ${data.items.length} events.`);
+      } while (nextPageToken);
+
+      console.log(`Total API Calls Made: ${apiCallCount}`);
+      return events;
+  } catch (error) {
+      console.error("Error fetching events:", error);
+      return [];
+  }
+};
+
