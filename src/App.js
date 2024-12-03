@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./hooks/useAuth";
-import { loadCalendarList, listEvents } from "./services/authService";
+import { loadCalendarList, listEvents, fetchAllEvents } from "./services/authService";
 import { StyledApp, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
 import Button from "./components/Common/Button/Button";
@@ -64,27 +64,37 @@ const App = () => {
   }, [events, startDate, endDate]);
 
   const groupedEvents = useMemo(() => {
-    return groupEventsBySummary(filteredEvents);
-  }, [filteredEvents]);
+    return groupEventsBySummary(events);
+}, [events]);
 
   const handleCalendarChange = (newCalendarId) => {
     setCalendarId(newCalendarId);
   };
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("accessToken");
-    if ((calendarId && isAuthorized) || savedToken) {
-      setLoading(true); 
-      const timeMin = new Date("1970-01-01").toISOString();
-      const timeMax = new Date("2100-01-01").toISOString();
-      listEvents(savedToken || accessToken, calendarId, timeMin, timeMax).then(
-        (fetchedEvents) => {
-          setEvents(fetchedEvents);
-          setLoading(false); 
+    const fetchData = async () => {
+        const savedToken = localStorage.getItem("accessToken");
+        if ((calendarId && isAuthorized) || savedToken) {
+            setLoading(true);
+
+            const timeMin = new Date("1970-01-01").toISOString();
+            const timeMax = new Date("2100-01-01").toISOString();
+
+            const fetchedEvents = await fetchAllEvents(
+                savedToken || accessToken,
+                calendarId,
+                timeMin,
+                timeMax
+            );
+
+            setEvents(fetchedEvents);
+            setLoading(false);
         }
-      );
-    }
-  }, [calendarId, accessToken, isAuthorized]);
+    };
+
+    fetchData();
+}, [calendarId, accessToken, isAuthorized]);
+;
 
   // if (loading) {
   //   return (
