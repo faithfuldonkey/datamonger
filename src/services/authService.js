@@ -1,31 +1,37 @@
 /* global google */
+import { loadGoogleApi } from "../utils/loadGoogleApi";
 
 let tokenClient;
 let accessToken = null;
 
 export const initializeGisClient = (clientId, scopes, onSuccess) => {
-  const savedToken = localStorage.getItem("accessToken");
+  loadGoogleApi(() => {
+    const savedToken = localStorage.getItem("accessToken");
 
-  if (savedToken) {
-    accessToken = savedToken; // Restore token from localStorage
-    console.log("Restored access token from localStorage:", accessToken);
+    if (savedToken) {
+      accessToken = savedToken;
+      console.log("Restored access token from localStorage:", accessToken);
 
-    // Optionally validate token
-    validateToken(savedToken).then((isValid) => {
-      if (isValid) {
-        onSuccess(accessToken);
-      } else {
-        console.log("Token is invalid or expired. Prompting login...");
-        tokenClient = createTokenClient(clientId, scopes, onSuccess);
-      }
-    });
-  } else {
-    tokenClient = createTokenClient(clientId, scopes, onSuccess);
-  }
+      validateToken(savedToken).then((isValid) => {
+        if (isValid) {
+          onSuccess(accessToken);
+        } else {
+          console.log("Token is invalid or expired. Prompting login...");
+          tokenClient = createTokenClient(clientId, scopes, onSuccess);
+        }
+      });
+    } else {
+      tokenClient = createTokenClient(clientId, scopes, onSuccess);
+    }
+  });
 };
 
-// Helper to create the token client
 const createTokenClient = (clientId, scopes, onSuccess) => {
+  if (!window.google) {
+    console.error("Google API not loaded yet.");
+    return;
+  }
+
   return google.accounts.oauth2.initTokenClient({
     client_id: clientId,
     scope: scopes,
@@ -35,7 +41,7 @@ const createTokenClient = (clientId, scopes, onSuccess) => {
         return;
       }
       accessToken = response.access_token;
-      localStorage.setItem("accessToken", accessToken); // Save token to localStorage
+      localStorage.setItem("accessToken", accessToken);
       console.log("Access token received and saved:", accessToken);
       onSuccess(accessToken);
     },
@@ -60,14 +66,20 @@ export const validateToken = async (token) => {
   }
 };
 
-export const requestAccessToken = () => {
-  if (!accessToken) {
-    tokenClient.requestAccessToken({ prompt: "consent" });
-  } else {
-    // Silent refresh of the token if already present
-    tokenClient.requestAccessToken({ prompt: "" });
+export const requestAccessToken = (callback) => {
+  if (!tokenClient) {
+    console.error("Token client is not initialized. Call initializeGisClient first.");
+    return;
   }
+  console.log("Requesting access token...");
+  tokenClient.requestAccessToken({
+    prompt: accessToken ? "" : "consent",
+    callback: () => {
+      if (callback) callback(); // Execute the callback after receiving the token
+    },
+  });
 };
+
 
 export const loadCalendarList = async (accessToken) => {
   try {

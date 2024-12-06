@@ -1,5 +1,3 @@
-/* global google */
-
 import { useEffect, useState } from "react";
 import { initializeGisClient, requestAccessToken } from "../services/authService";
 
@@ -13,12 +11,15 @@ export const useAuth = () => {
   useEffect(() => {
     initializeGisClient(CLIENT_ID, SCOPES, (token) => {
       setAccessToken(token);
-      setIsAuthorized(true);
+      setIsAuthorized(true); // User is authorized after receiving the token
     });
   }, []);
 
   const handleAuthClick = () => {
-    requestAccessToken();
+    requestAccessToken(() => {
+      // This callback is called after token is received
+      setIsAuthorized(true); // Ensure state updates to reflect authorization
+    });
   };
 
   const handleSignoutClick = () => {
@@ -30,5 +31,5 @@ export const useAuth = () => {
     console.log("Signed out successfully.");
   };
 
-  return { isAuthorized, accessToken, handleAuthClick, handleSignoutClick }; // Include handleSignoutClick
+  return { isAuthorized, accessToken, handleAuthClick, handleSignoutClick };
 };
