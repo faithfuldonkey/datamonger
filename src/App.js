@@ -23,12 +23,12 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [isStandalone, setIsStandalone] = useState(false);
 
-  // Detect standalone mode
-  useEffect(() => {
-    const isStandaloneMode =
-      window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-    setIsStandalone(isStandaloneMode);
-  }, []);
+  // // Detect standalone mode
+  // useEffect(() => {
+  //   const isStandaloneMode =
+  //     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+  //   setIsStandalone(isStandaloneMode);
+  // }, []);
 
   // Save the access token when it changes
   useEffect(() => {

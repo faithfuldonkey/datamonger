@@ -11,8 +11,8 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     line-height: 1.5;
-    background-color: #f8f8f8; /* Matches your app's background */
-    color: #333; /* Default text color */
+    background-color: #f8f8f8;
+    color: #333;
   }
 
   button, input, textarea {
@@ -21,12 +21,19 @@ const GlobalStyle = createGlobalStyle`
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    font-weight: 700; /* Bold headings */
+    font-weight: 700;
   }
 
   a {
     text-decoration: none;
     color: inherit;
+  }
+
+  /* Adjust padding for iOS standalone mode */
+  @media (display-mode: standalone) {
+    body {
+      padding-top: calc(env(safe-area-inset-top) - 1rem);
+    }
   }
 `;
 

@@ -2,16 +2,16 @@ import styled from "styled-components";
 
 export const StyledHeaderBar = styled.header`
   display: flex;
-  justify-content: space-between; /* Space out the left, center, and right sections */
+  justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 1000;
   padding-bottom: 1rem;
-
-  width: 100%; /* Ensure it spans the full width of the app */
-  box-sizing: border-box; /* Include padding in the width calculation */
+  width: 100%;
+  box-sizing: border-box;
 `;
+
 
 export const StyledIcon = styled.span`
   cursor: pointer;
