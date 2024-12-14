@@ -11,11 +11,23 @@ export const StyledApp = styled.div`
 
 export const LoggedOutContainer = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh; /* Full viewport height for logged-out view */
+  height: 100vh;
   background-color: #f8f8f8;
+  gap: 2rem;
+  padding: 2rem;
+  text-align: center;
+
+  h1 {
+    color: #333;
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
 `;
 
 export const MainPage = styled.div`
