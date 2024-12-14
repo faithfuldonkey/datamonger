@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import GlobalStyle from "./styles/GlobalStyles";
-import { StyledApp } from "./StyledComponents";
+import { StyledApp, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
 import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails";
 import GroupedEvents from "./components/Trackers/GroupedEvents";
@@ -19,7 +19,7 @@ const App = () => {
   const [groupedEvents, setGroupedEvents] = useState({});
   const [calendars, setCalendars] = useState([]);
   const [calendarId, setCalendarId] = useState("c_df81fe5a7834b103d42948781e8fa7a770ad7615ff8ed586e401d8d0c1a9b855@group.calendar.google.com");
-  const [startDate, setStartDate] = useState(new Date(new Date().setMonth(new Date().getMonth() - 1)));
+  const [startDate, setStartDate] = useState(new Date("1970-01-01T00:00:00Z"));
   const [endDate, setEndDate] = useState(new Date());
 
   const login = useGoogleLogin({
@@ -36,7 +36,11 @@ const App = () => {
   });
 
   const fetchAllEvents = async (token, calendarId, timeMin, timeMax) => {
-    try {
+  try {
+    let allEvents = [];
+    let pageToken = null;
+    
+    do {
       const url = new URL(
         `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`
       );
@@ -44,6 +48,11 @@ const App = () => {
       url.searchParams.append("timeMax", timeMax);
       url.searchParams.append("singleEvents", "true");
       url.searchParams.append("orderBy", "startTime");
+      url.searchParams.append("maxResults", "2500"); // Maximum allowed per page
+      
+      if (pageToken) {
+        url.searchParams.append("pageToken", pageToken);
+      }
 
       const response = await fetch(url, {
         headers: {
@@ -61,12 +70,22 @@ const App = () => {
       }
 
       const data = await response.json();
-      return data.items || [];
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      return [];
-    }
-  };
+      allEvents = [...allEvents, ...(data.items || [])];
+      pageToken = data.nextPageToken;
+      
+      if (allEvents.length >= 20000) {
+        console.log("Reached maximum event limit of 20,000");
+        break;
+      }
+    } while (pageToken);
+
+    console.log(`Fetched ${allEvents.length} total events`);
+    return allEvents;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return [];
+  }
+};
 
   // Check for existing token on mount
   useEffect(() => {
@@ -138,6 +157,7 @@ const App = () => {
     <>
       <GlobalStyle />
       <StyledApp>
+        <MainPage>
           <HeaderBar
             onCloseTracker={selectedGroup ? () => setSelectedGroup(null) : null}
             onToggleAccountMenu={() => setIsAccountMenuVisible(!isAccountMenuVisible)}
@@ -170,6 +190,7 @@ const App = () => {
               onGroupClick={setSelectedGroup} 
             />
           )}
+        </MainPage>
       </StyledApp>
     </>
   );
