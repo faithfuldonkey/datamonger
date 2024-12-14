@@ -2,21 +2,21 @@ import styled from "styled-components";
 
 export const StyledTrackerFrame = styled.div`
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping */
-  gap: 1rem; /* Consistent spacing */
-  justify-content: space-between; /* Spread items evenly across rows */
-  width: 100%; /* Ensure the container takes full width */
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
 
-  /* Scroll behavior for selected state */
   overflow-x: ${({ isSelected }) => (isSelected ? "scroll" : "hidden")};
   overflow-y: ${({ isSelected }) => (isSelected ? "hidden" : "auto")};
   max-height: ${({ isSelected }) => (isSelected ? "90vh" : "none")};
 
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
+    display: none;
   }
 
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
 `;
