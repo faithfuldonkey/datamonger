@@ -1,43 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { initializeGisClient, requestAccessToken } from "../services/authService";
-
-const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const SCOPES = "https://www.googleapis.com/auth/calendar";
+import React, { createContext, useContext, useState } from "react";
+import { handleLoginSuccess, logout } from "../services/authService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    // Initialize the GIS client and check for saved token
-    initializeGisClient(CLIENT_ID, SCOPES, (token) => {
-      setIsAuthorized(true); // Token is valid, mark as authorized
-    });
-  }, []);
-
-  const handleAuthClick = () => {
-    requestAccessToken();
+  const handleAuthClick = (credentialResponse) => {
+    const decodedUser = handleLoginSuccess(credentialResponse);
+    if (decodedUser) {
+      setUser(decodedUser); // Save decoded user info and token in memory
+      console.log("User logged in:", decodedUser);
+    } else {
+      console.error("Failed to decode user.");
+    }
   };
 
   const handleSignoutClick = () => {
-    console.log("Signing out...");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("calendarId");
-    setIsAuthorized(false);
-  
-    // Confirm that state updates asynchronously
-    setTimeout(() => {
-      console.log("isAuthorized (after state update):", isAuthorized); // Should be false
-    }, 0);
+    logout();
+    setUser(null); // Clear user state
   };
-  
-  
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthorized,
+        user,
+        isAuthorized: !!user,
         handleAuthClick,
         handleSignoutClick,
       }}

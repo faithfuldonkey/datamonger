@@ -2,17 +2,7 @@ import React from "react";
 import { StyledIcon, StyledHeaderBar, CenterContent } from "./HeaderBar.styles";
 import AccountMenu from "../../Auth/AccountMenu/AccountMenu";
 
-const HeaderBar = ({
-  onCloseTracker,
-  onToggleAccountMenu,
-  isAccountMenuVisible,
-  isAuthorized,
-  onAuthClick,
-  onSignoutClick,
-  calendarId,
-  calendarList,
-  onCalendarChange,
-}) => (
+const HeaderBar = ({ onCloseTracker, onToggleAccountMenu, isAccountMenuVisible, isAuthorized, onAuthClick, onSignoutClick }) => (
   <StyledHeaderBar>
     {/* Back button on the far left */}
     {onCloseTracker ? (
@@ -35,13 +25,10 @@ const HeaderBar = ({
       {/* Conditional rendering for the AccountMenu */}
       {isAccountMenuVisible && (
         <AccountMenu
-        isAuthorized={isAuthorized}
-        onAuthClick={onAuthClick}
-        onSignoutClick={onSignoutClick} // Rename to match AccountMenu's prop name
-        calendarId={calendarId}
-        calendarList={calendarList}
-        onCalendarChange={onCalendarChange}
-      />
+          isAuthorized={isAuthorized}
+          onAuthClick={onAuthClick}
+          onSignoutClick={onSignoutClick}
+        />
       )}
     </div>
   </StyledHeaderBar>
