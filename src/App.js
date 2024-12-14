@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { GoogleLogin } from "@react-oauth/google";
 import { useGoogleLogin } from "@react-oauth/google";
+import GlobalStyle from "./styles/GlobalStyles";
+import { StyledApp } from "./StyledComponents";
+import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
+import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails";
+import GroupedEvents from "./components/Trackers/GroupedEvents";
+import { groupEventsBySummary } from "./utils/groupEvents";
 
 const App = () => {
+  // Authentication states
   const [accessToken, setAccessToken] = useState(null);
-  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const calendarId = "c_df81fe5a7834b103d42948781e8fa7a770ad7615ff8ed586e401d8d0c1a9b855@group.calendar.google.com";
+  
+  // UI states
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [groupedEvents, setGroupedEvents] = useState({});
+  const [calendars, setCalendars] = useState([]);
+  const [calendarId, setCalendarId] = useState("c_df81fe5a7834b103d42948781e8fa7a770ad7615ff8ed586e401d8d0c1a9b855@group.calendar.google.com");
+  const [startDate, setStartDate] = useState(new Date(new Date().setMonth(new Date().getMonth() - 1)));
+  const [endDate, setEndDate] = useState(new Date());
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log("Access Token:", tokenResponse.access_token);
-      // Store the token and expiry time
       const expiryTime = new Date().getTime() + tokenResponse.expires_in * 1000;
       localStorage.setItem('googleAccessToken', tokenResponse.access_token);
       localStorage.setItem('tokenExpiry', expiryTime.toString());
@@ -20,12 +32,11 @@ const App = () => {
     },
     onError: () => console.error("Login Failed"),
     scope: "https://www.googleapis.com/auth/calendar.readonly",
-    persistence: true, // Enable token persistence
+    persistence: true,
   });
 
   const fetchAllEvents = async (token, calendarId, timeMin, timeMax) => {
     try {
-      console.log("Fetching events with:", { token, calendarId, timeMin, timeMax });
       const url = new URL(
         `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`
       );
@@ -43,17 +54,13 @@ const App = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error(`Failed to fetch events: ${response.status}`, errorData);
-        // If token is invalid, clear storage and reset state
         if (response.status === 401) {
-          localStorage.removeItem('googleAccessToken');
-          localStorage.removeItem('tokenExpiry');
-          setAccessToken(null);
+          handleLogout();
         }
         return [];
       }
 
       const data = await response.json();
-      console.log("Fetched events:", data.items);
       return data.items || [];
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -71,36 +78,47 @@ const App = () => {
       if (!isExpired) {
         setAccessToken(storedToken);
       } else {
-        // Clear expired token
-        localStorage.removeItem('googleAccessToken');
-        localStorage.removeItem('tokenExpiry');
+        handleLogout();
       }
     }
     setLoading(false);
   }, []);
 
+  // Fetch events when token or calendar changes
   useEffect(() => {
     if (accessToken) {
       setLoading(true);
       fetchAllEvents(
         accessToken,
         calendarId,
-        "1970-01-01T00:00:00Z",
-        new Date().toISOString()
+        startDate.toISOString(),
+        endDate.toISOString()
       )
         .then((fetchedEvents) => {
           setEvents(fetchedEvents);
+          const grouped = groupEventsBySummary(fetchedEvents);
+          setGroupedEvents(grouped);
         })
         .catch((err) => console.error("Failed to fetch events:", err))
         .finally(() => setLoading(false));
     }
-  }, [accessToken]);
+  }, [accessToken, calendarId, startDate, endDate]);
 
   const handleLogout = () => {
     localStorage.removeItem('googleAccessToken');
     localStorage.removeItem('tokenExpiry');
     setAccessToken(null);
     setEvents([]);
+    setGroupedEvents({});
+    setSelectedGroup(null);
+  };
+
+  const handleCalendarChange = (newCalendarId) => {
+    setCalendarId(newCalendarId);
+  };
+
+  const handleTrackerClick = (trackerName) => {
+    setSelectedGroup(trackerName);
   };
 
   if (loading) {
@@ -117,23 +135,43 @@ const App = () => {
   }
 
   return (
-    <div>
-      <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Calendar Events</h1>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-      {events.length > 0 ? (
-        <ul>
-          {events.map((event) => (
-            <li key={event.id}>
-              {event.summary} - {event.start.dateTime || event.start.date}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No events found</p>
-      )}
-    </div>
+    <>
+      <GlobalStyle />
+      <StyledApp>
+          <HeaderBar
+            onCloseTracker={selectedGroup ? () => setSelectedGroup(null) : null}
+            onToggleAccountMenu={() => setIsAccountMenuVisible(!isAccountMenuVisible)}
+            isAccountMenuVisible={isAccountMenuVisible}
+            isAuthorized={!!accessToken}
+            onAuthClick={login}
+            onSignoutClick={handleLogout}
+            calendarId={calendarId}
+            calendarList={calendars}
+            onCalendarChange={handleCalendarChange}
+          />
+          {selectedGroup ? (
+            <TrackerDetails
+              groupTitle={selectedGroup}
+              events={groupedEvents[selectedGroup] || []}
+              trackers={Object.keys(groupedEvents)}
+              allTrackers={Object.keys(groupEventsBySummary(events))}
+              onBackClick={() => setSelectedGroup(null)}
+              onTrackerClick={handleTrackerClick}
+              startDate={startDate}
+              endDate={endDate}
+              onDateChange={(newStartDate, newEndDate) => {
+                setStartDate(newStartDate);
+                setEndDate(newEndDate);
+              }}
+            />
+          ) : (
+            <GroupedEvents 
+              groupedEvents={groupedEvents} 
+              onGroupClick={setSelectedGroup} 
+            />
+          )}
+      </StyledApp>
+    </>
   );
 };
 
