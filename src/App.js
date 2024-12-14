@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import GlobalStyle from "./styles/GlobalStyles";
-import { StyledApp, MainPage } from "./StyledComponents";
+import { StyledApp, LoggedOutContainer, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
 import TrackerDetails from "./components/Trackers/TrackerDetails/TrackerDetails";
 import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
+import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner";
+import { StyledButton } from "./components/Auth/AccountMenu/AccountMenu.styles";
 
 const App = () => {
   // Authentication states
@@ -29,6 +31,7 @@ const App = () => {
       localStorage.setItem('googleAccessToken', tokenResponse.access_token);
       localStorage.setItem('tokenExpiry', expiryTime.toString());
       setAccessToken(tokenResponse.access_token);
+      setIsAccountMenuVisible(false); // Add this line to ensure menu is collapsed after login
     },
     onError: () => console.error("Login Failed"),
     scope: "https://www.googleapis.com/auth/calendar.readonly",
@@ -110,18 +113,29 @@ const App = () => {
       fetchAllEvents(
         accessToken,
         calendarId,
-        startDate.toISOString(),
-        endDate.toISOString()
+        new Date("1970-01-01T00:00:00Z").toISOString(), // Always fetch all events
+        new Date().toISOString()
       )
         .then((fetchedEvents) => {
           setEvents(fetchedEvents);
-          const grouped = groupEventsBySummary(fetchedEvents);
-          setGroupedEvents(grouped);
         })
         .catch((err) => console.error("Failed to fetch events:", err))
         .finally(() => setLoading(false));
     }
-  }, [accessToken, calendarId, startDate, endDate]);
+  }, [accessToken, calendarId]); // Remove startDate and endDate from dependencies
+  
+  // Handle filtering and grouping when events or dates change
+  useEffect(() => {
+    // Filter events based on date range
+    const filteredEvents = events.filter(event => {
+      const eventDate = new Date(event.start.dateTime || event.start.date);
+      return eventDate >= startDate && eventDate <= endDate;
+    });
+    
+    // Group the filtered events
+    const grouped = groupEventsBySummary(filteredEvents);
+    setGroupedEvents(grouped);
+  }, [events, startDate, endDate]);;
 
   const handleLogout = () => {
     localStorage.removeItem('googleAccessToken');
@@ -141,15 +155,26 @@ const App = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <GlobalStyle />
+        <StyledApp>
+          <LoadingSpinner />
+        </StyledApp>
+      </>
+    );
   }
 
   if (!accessToken) {
     return (
-      <div>
-        <h1>Login to Access Calendar</h1>
-        <button onClick={() => login()}>Sign in with Google</button>
-      </div>
+      <>
+        <GlobalStyle />
+        <StyledApp>
+          <LoggedOutContainer>
+            <StyledButton onClick={() => login()}>Sign in with Google</StyledButton>
+          </LoggedOutContainer>
+        </StyledApp>
+      </>
     );
   }
 

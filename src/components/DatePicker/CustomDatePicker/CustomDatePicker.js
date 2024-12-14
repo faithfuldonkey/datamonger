@@ -40,49 +40,71 @@ const CustomDatePicker = ({ startDate, endDate, onDateChange, onPresetSelect }) 
     },
   ];
 
-  useEffect(() => {
-    if (onPresetSelect) {
-      const defaultPreset = presets[3];
-      onDateChange(defaultPreset.value[0], defaultPreset.value[1]);
-      onPresetSelect(defaultPreset.label);
-    }
-  }, []);
+  // Remove the initial useEffect that was setting default dates
 
-  const handlePresetSelect = ([presetStartDate, presetEndDate], label) => {
-    onDateChange(presetStartDate, presetEndDate);
-    onPresetSelect(label); 
+  const handlePresetSelect = (preset) => {
+    if (onDateChange) {
+      onDateChange(preset.value[0], preset.value[1]);
+    }
+    if (onPresetSelect) {
+      onPresetSelect(preset.label);
+    }
   };
 
   const handleStartDateChange = (date) => {
-    onDateChange(date, endDate);
-    onPresetSelect("Custom"); 
+    if (onDateChange) {
+      // Ensure the start date isn't after the end date
+      const newStartDate = date > endDate ? endDate : date;
+      onDateChange(newStartDate, endDate);
+    }
+    if (onPresetSelect) {
+      onPresetSelect("Custom");
+    }
   };
 
   const handleEndDateChange = (date) => {
-    onDateChange(startDate, date);
-    onPresetSelect("Custom"); 
+    if (onDateChange) {
+      // Ensure the end date isn't before the start date
+      const newEndDate = date < startDate ? startDate : date;
+      onDateChange(startDate, newEndDate);
+    }
+    if (onPresetSelect) {
+      onPresetSelect("Custom");
+    }
   };
 
   return (
-    <StyledDatePickerContainer>
+    <StyledDatePickerContainer onClick={(e) => e.stopPropagation()}>
       <DateRangeContainer>
         <DatePicker
           selected={startDate}
           onChange={handleStartDateChange}
           dateFormat="MM/dd/yyyy"
+          maxDate={endDate}
+          selectsStart
+          startDate={startDate}
+          endDate={endDate}
         />
         <div className="date-separator">-</div>
         <DatePicker
           selected={endDate}
           onChange={handleEndDateChange}
           dateFormat="MM/dd/yyyy"
+          minDate={startDate}
+          selectsEnd
+          startDate={startDate}
+          endDate={endDate}
         />
       </DateRangeContainer>
       <DatePresetsContainer>
         {presets.map((preset) => (
           <DatePresetButton
             key={preset.label}
-            onClick={() => handlePresetSelect(preset.value, preset.label)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handlePresetSelect(preset);
+            }}
           >
             {preset.label}
           </DatePresetButton>
