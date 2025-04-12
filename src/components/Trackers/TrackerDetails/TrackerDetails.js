@@ -4,6 +4,7 @@ import TotalCount from "../../Statistics/Statistics/TotalCount.js";
 import AverageTimeBetween from "../../Statistics/Statistics/AverageTimeBetween.js";
 import LongestDailyStreak from "../../Statistics/Statistics/LongestDailyStreak";
 import MostIn24Hours from "../../Statistics/Statistics/MostIn24Hours";
+import LongestStreakWithout from "../../Statistics/Statistics/LongestStreakWithout";
 import Table from "../../Common/Table/Table";
 import CustomDatePicker from "../../DatePicker/CustomDatePicker/CustomDatePicker";
 import Tracker from "../Tracker/Tracker";
@@ -110,8 +111,9 @@ const TrackerDetails = ({
           <TimeSinceLast events={events} />
           <TotalCount events={events} />
           <AverageTimeBetween events={events} />
-          <LongestDailyStreak events={events} />
           <MostIn24Hours events={events} />
+          <LongestDailyStreak events={events} />
+          <LongestStreakWithout events={events} />
         </StatisticsContainer>
       )}
 

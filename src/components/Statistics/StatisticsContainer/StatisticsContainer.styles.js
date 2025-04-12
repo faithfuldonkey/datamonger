@@ -2,15 +2,15 @@ import styled from "styled-components";
 
 export const StyledStatisticsContainer = styled.div`
   display: flex;
-  height: 4rem;
-  padding: 0.9375rem 1.25rem; /* Match old padding */
-  justify-content: space-between; /* Add space between label and data */
-  align-items: center; /* Center vertically */
-  flex-shrink: 0; /* Prevent shrinking */
-  align-self: stretch; /* Stretch to the container width */
-  border-radius: 0.625rem; /* Rounded corners */
-  background: #fff; /* White background */
-  margin: 0.3125rem 0; /* Vertical margin */
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  margin: 0.3125rem 0;
+  background: #fff;
+  border-radius: 0.625rem;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 4.5rem;
 `;
 
 export const StatisticsLabel = styled.span`
@@ -26,12 +26,21 @@ export const StatisticsLabel = styled.span`
 export const StatisticsData = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 1 0 0; /* Prevent shrinking and allow full width */
-  color: #000; /* Black text */
-  text-align: right; /* Align data to the right */
-  font-size: 1rem; /* Match old font size */
-  font-family: "Inter", sans-serif; /* Font family */
+  align-items: flex-end;
+  text-align: right;
+  color: #000;
+  font-size: 1rem;
+  font-family: "Inter", sans-serif;
   font-style: normal;
-  font-weight: 700; /* Bold weight for data */
+  font-weight: 700;
   line-height: 140%;
+`;
+
+
+export const DateRange = styled.div`
+  font-size: 0.8125rem;
+  color: #4caf50;
+  font-style: italic;
+  font-weight: 500;
+  margin-top: 0.25rem;
 `;

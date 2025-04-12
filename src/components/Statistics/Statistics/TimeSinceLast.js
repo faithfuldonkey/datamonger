@@ -1,30 +1,25 @@
 import React from "react";
 import StatisticsContainer from "../StatisticsContainer/StatisticsContainer";
-import { formatTimeDifference } from "../../../utils/formatters";
+import { getTimeDifferenceFormats } from "../../../utils/formatters";
 
 const TimeSinceLast = ({ events }) => {
   const calculateTimeSinceLast = () => {
-    if (events.length === 0) {
-      return "N/A"; // Handle empty event array
-    }
+    if (events.length === 0) return "N/A";
 
     const lastEvent = events[events.length - 1];
-    if (!lastEvent || !lastEvent.start) {
-      return "N/A"; // Handle missing or malformed event data
-    }
+    if (!lastEvent || !lastEvent.start) return "N/A";
 
     const now = new Date();
     const lastEventDate = new Date(lastEvent.start.dateTime || lastEvent.start.date);
     const diff = Math.abs(now - lastEventDate);
 
-    return formatTimeDifference(diff);
+    const formats = getTimeDifferenceFormats(diff);
+
+    return { streak: formats }; // 👈 an array now
   };
 
   return (
-    <StatisticsContainer
-      label="Time Since Last"
-      data={calculateTimeSinceLast()}
-    />
+    <StatisticsContainer label="Time Since Last" data={calculateTimeSinceLast()} />
   );
 };
 

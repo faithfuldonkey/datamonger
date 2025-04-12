@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // Trigger re-render
 import { useGoogleLogin } from "@react-oauth/google";
 import GlobalStyle from "./styles/GlobalStyles";
 import { StyledApp, LoggedOutContainer, MainPage } from "./StyledComponents";

@@ -1,12 +1,10 @@
 import React from "react";
 import StatisticsContainer from "../StatisticsContainer/StatisticsContainer";
-import { formatTimeDifference } from "../../../utils/formatters";
+import { getTimeDifferenceFormats } from "../../../utils/formatters";
 
 const AverageTimeBetween = ({ events }) => {
   const calculateAverageTime = () => {
-    if (events.length < 2) {
-      return "N/A"; // Handle case where there are fewer than 2 events
-    }
+    if (events.length < 2) return "N/A";
 
     let totalDifference = 0;
     for (let i = 0; i < events.length - 1; i++) {
@@ -16,7 +14,7 @@ const AverageTimeBetween = ({ events }) => {
     }
 
     const avgDiff = totalDifference / (events.length - 1);
-    return formatTimeDifference(avgDiff);
+    return { streak: getTimeDifferenceFormats(avgDiff) };
   };
 
   return (
