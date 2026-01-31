@@ -19,7 +19,7 @@ const App = () => {
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [groupedEvents, setGroupedEvents] = useState({});
-  const [calendars, setCalendars] = useState([]);
+  const [calendars] = useState([]);
   const [calendarId, setCalendarId] = useState("c_df81fe5a7834b103d42948781e8fa7a770ad7615ff8ed586e401d8d0c1a9b855@group.calendar.google.com");
   const [startDate, setStartDate] = useState(new Date("1970-01-01T00:00:00Z"));
   const [endDate, setEndDate] = useState(new Date());
@@ -97,7 +97,8 @@ const App = () => {
         .catch((err) => console.error("Failed to fetch events:", err))
         .finally(() => setEventsLoading(false));
     }
-  }, [accessToken, calendarId]); // Remove startDate and endDate from dependencies
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, calendarId]);
   
   // Handle filtering and grouping when events or dates change
   useEffect(() => {

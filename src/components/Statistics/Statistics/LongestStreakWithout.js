@@ -1,7 +1,6 @@
 import React from "react";
 import StatisticsContainer from "../StatisticsContainer/StatisticsContainer";
 import { formatDate } from "../../../utils/formatters";
-import { DeltaTimeIndicator } from "../../Trackers/TrackerDetails/TrackerDetails.styles";
 
 const LongestStreakWithout = ({ events }) => {
   const calculateLongestStreakWithout = () => {

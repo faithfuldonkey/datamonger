@@ -1,4 +1,5 @@
-let accessToken = null;
+// eslint-disable-next-line no-unused-vars
+let _accessToken = null;
 
 // Handle login success and store token in memory
 export const handleLoginSuccess = (credentialResponse) => {
@@ -8,7 +9,7 @@ export const handleLoginSuccess = (credentialResponse) => {
     return null;
   }
 
-  accessToken = token; // Store the token in memory
+  _accessToken = token; // Store the token in memory
   console.log("Access token received:", token);
 
   return { token }; // Return the token for further use
@@ -16,7 +17,7 @@ export const handleLoginSuccess = (credentialResponse) => {
 
 // Clear access token from memory
 export const logout = () => {
-  accessToken = null;
+  _accessToken = null;
   console.log("User logged out and token cleared.");
 };
 

@@ -23,6 +23,7 @@ export const useAuth = () => {
         refreshAccessToken();
       }, refreshTime);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Refresh access token using HTTP-only cookie
