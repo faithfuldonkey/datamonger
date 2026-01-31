@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react"; // Trigger re-render
-import { useGoogleLogin } from "@react-oauth/google";
+import React, { useEffect, useState } from "react";
 import GlobalStyle from "./styles/GlobalStyles";
 import { StyledApp, LoggedOutContainer, MainPage } from "./StyledComponents";
 import HeaderBar from "./components/Header/HeaderBar/HeaderBar";
@@ -8,35 +7,27 @@ import GroupedEvents from "./components/Trackers/GroupedEvents";
 import { groupEventsBySummary } from "./utils/groupEvents";
 import LoadingSpinner from "./components/Common/LoadingSpinner/LoadingSpinner";
 import { StyledButton } from "./components/Auth/AccountMenu/AccountMenu.styles";
+import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
-  // Authentication states
-  const [accessToken, setAccessToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
+  // Authentication from useAuth hook
+  const { accessToken, loading: authLoading, login, logout, isAuthenticated } = useAuth();
+
   // UI states
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isAccountMenuVisible, setIsAccountMenuVisible] = useState(false);
   const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
   const [groupedEvents, setGroupedEvents] = useState({});
-  const [calendars, setCalendars] = useState([]);
+  const [calendars] = useState([]);
   const [calendarId, setCalendarId] = useState("c_df81fe5a7834b103d42948781e8fa7a770ad7615ff8ed586e401d8d0c1a9b855@group.calendar.google.com");
   const [startDate, setStartDate] = useState(new Date("1970-01-01T00:00:00Z"));
   const [endDate, setEndDate] = useState(new Date());
 
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      console.log("Access Token:", tokenResponse.access_token);
-      const expiryTime = new Date().getTime() + tokenResponse.expires_in * 1000;
-      localStorage.setItem('googleAccessToken', tokenResponse.access_token);
-      localStorage.setItem('tokenExpiry', expiryTime.toString());
-      setAccessToken(tokenResponse.access_token);
-      setIsAccountMenuVisible(false); // Add this line to ensure menu is collapsed after login
-    },
-    onError: () => console.error("Login Failed"),
-    scope: "https://www.googleapis.com/auth/calendar.readonly",
-    persistence: true,
-  });
+  const handleLogin = () => {
+    login();
+    setIsAccountMenuVisible(false);
+  };
 
   const fetchAllEvents = async (token, calendarId, timeMin, timeMax) => {
   try {
@@ -90,26 +81,10 @@ const App = () => {
   }
 };
 
-  // Check for existing token on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem('googleAccessToken');
-    const tokenExpiry = localStorage.getItem('tokenExpiry');
-    
-    if (storedToken && tokenExpiry) {
-      const isExpired = new Date().getTime() > parseInt(tokenExpiry);
-      if (!isExpired) {
-        setAccessToken(storedToken);
-      } else {
-        handleLogout();
-      }
-    }
-    setLoading(false);
-  }, []);
-
   // Fetch events when token or calendar changes
   useEffect(() => {
     if (accessToken) {
-      setLoading(true);
+      setEventsLoading(true);
       fetchAllEvents(
         accessToken,
         calendarId,
@@ -120,9 +95,10 @@ const App = () => {
           setEvents(fetchedEvents);
         })
         .catch((err) => console.error("Failed to fetch events:", err))
-        .finally(() => setLoading(false));
+        .finally(() => setEventsLoading(false));
     }
-  }, [accessToken, calendarId]); // Remove startDate and endDate from dependencies
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, calendarId]);
   
   // Handle filtering and grouping when events or dates change
   useEffect(() => {
@@ -138,9 +114,7 @@ const App = () => {
   }, [events, startDate, endDate]);;
 
   const handleLogout = () => {
-    localStorage.removeItem('googleAccessToken');
-    localStorage.removeItem('tokenExpiry');
-    setAccessToken(null);
+    logout();
     setEvents([]);
     setGroupedEvents({});
     setSelectedGroup(null);
@@ -154,7 +128,7 @@ const App = () => {
     setSelectedGroup(trackerName);
   };
 
-  if (loading) {
+  if (authLoading || eventsLoading) {
     return (
       <>
         <GlobalStyle />
@@ -165,13 +139,13 @@ const App = () => {
     );
   }
 
-  if (!accessToken) {
+  if (!isAuthenticated) {
     return (
       <>
         <GlobalStyle />
         <StyledApp>
           <LoggedOutContainer>
-            <StyledButton onClick={() => login()}>Sign in with Google</StyledButton>
+            <StyledButton onClick={handleLogin}>Sign in with Google</StyledButton>
           </LoggedOutContainer>
         </StyledApp>
       </>
@@ -187,8 +161,8 @@ const App = () => {
             onCloseTracker={selectedGroup ? () => setSelectedGroup(null) : null}
             onToggleAccountMenu={() => setIsAccountMenuVisible(!isAccountMenuVisible)}
             isAccountMenuVisible={isAccountMenuVisible}
-            isAuthorized={!!accessToken}
-            onAuthClick={login}
+            isAuthorized={isAuthenticated}
+            onAuthClick={handleLogin}
             onSignoutClick={handleLogout}
             calendarId={calendarId}
             calendarList={calendars}

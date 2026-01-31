@@ -1,6 +1,5 @@
 import React from "react";
 import StatisticsContainer from "../StatisticsContainer/StatisticsContainer";
-import { formatDate } from "../../../utils/formatters";
 
 const MostIn24Hours = ({ events }) => {
   const calculateMostIn24Hours = () => {
